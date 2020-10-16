@@ -53,6 +53,7 @@ dkms.conf
 makefile.dep
 gf3d
 *.log
+*.tlog
 
 # Vulkan debug
 *.gfxr
