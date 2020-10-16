@@ -107,7 +107,7 @@ void gf3d_vgraphics_init(
     gfc_matrix_identity(gf3d_vgraphics.ubo.proj);
     gfc_matrix_view(
         gf3d_vgraphics.ubo.view,
-        vector3d(2,40,2),
+        vector3d(0,20,0),
         vector3d(0,0,0),
         vector3d(0,0,1)
     );
@@ -665,14 +665,13 @@ uint32_t gf3d_vgraphics_find_memory_type(uint32_t typeFilter, VkMemoryPropertyFl
     return 0;
 }
 
-void gf3d_vgraphics_rotate_camera(float degrees)
+void gf3d_vgraphics_rotate_camera(Vector3D axis, float degrees)
 {
     gfc_matrix_rotate(
-        gf3d_vgraphics.ubo.view,
-        gf3d_vgraphics.ubo.view,
+        gf3d_vgraphics.ubo.proj,
+        gf3d_vgraphics.ubo.proj,
         degrees,
-        vector3d(0,0,1));
-
+        axis);
 }
 
 Pipeline *gf3d_vgraphics_get_graphics_pipeline()
@@ -713,6 +712,7 @@ VkImageView gf3d_vgraphics_create_image_view(VkImage image, VkFormat format)
 
     return imageView;
 }
+
 
 /*eol@eof*/
 

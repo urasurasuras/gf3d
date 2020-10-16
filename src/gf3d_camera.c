@@ -1,4 +1,5 @@
 #include "gfc_matrix.h"
+#include "gf3d_camera.h"
 
 #include <string.h>
 
