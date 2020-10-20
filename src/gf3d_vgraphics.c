@@ -23,7 +23,7 @@
 #include "gf3d_pipeline.h"
 #include "gf3d_commands.h"
 #include "gf3d_texture.h"
-
+#include "gf3d_camera.h"
 
 typedef struct
 {
@@ -668,10 +668,67 @@ uint32_t gf3d_vgraphics_find_memory_type(uint32_t typeFilter, VkMemoryPropertyFl
 void gf3d_vgraphics_rotate_camera(Vector3D axis, float degrees)
 {
     gfc_matrix_rotate(
-        gf3d_vgraphics.ubo.proj,
-        gf3d_vgraphics.ubo.proj,
-        degrees,
-        axis);
+        gf3d_vgraphics.ubo.view,
+        gf3d_vgraphics.ubo.view,
+        -degrees,
+        axis
+    );
+
+    //gf3d_vgraphics.ubo.view[2][0] = 0;
+    //gf3d_vgraphics.ubo.view[2][1] = 1;
+    //gf3d_vgraphics.ubo.view[2][2] = 0;
+    gf3d_camera_set_view(&gf3d_vgraphics.ubo.view);    
+    gfc_matrix_slog(gf3d_vgraphics.ubo.view);
+}
+
+// Pitch must be in the range of [-90 ... 90] degrees and 
+// yaw must be in the range of [0 ... 360] degrees.
+// Pitch and yaw variables must be expressed in radians.
+void FPSViewRH(Matrix4 out, Vector3D eye, float pitch, float yaw)
+{
+    // I assume the values are already converted to radians.
+    float cosPitch = cos(pitch);
+    float sinPitch = sin(pitch);
+    float cosYaw = cos(yaw);
+    float sinYaw = sin(yaw);
+
+    Vector3D xaxis = { cosYaw, 0, -sinYaw };
+    Vector3D yaxis = { sinYaw * sinPitch, cosPitch, cosYaw * sinPitch };
+    Vector3D zaxis = { sinYaw * cosPitch, -sinPitch, cosPitch * cosYaw };
+
+    // Create a 4x4 view matrix from the right, up, forward and eye position vectors
+    Matrix4 viewMatrix;
+
+    viewMatrix[0][0] = xaxis.z;
+    viewMatrix[0][1] = yaxis.z;
+    viewMatrix[0][2] = zaxis.z;
+    viewMatrix[0][3] = 0;
+    
+    viewMatrix[1][0] = xaxis.x;
+    viewMatrix[1][1] = yaxis.x;
+    viewMatrix[1][2] = zaxis.x;
+    viewMatrix[1][3] = 0;
+    
+    viewMatrix[2][0] = xaxis.y;
+    viewMatrix[2][1] = yaxis.y;
+    viewMatrix[2][2] = zaxis.y;
+    viewMatrix[2][3] = 0;
+    
+    viewMatrix[3][0] = -vector3d_dot_product(xaxis, eye);
+    viewMatrix[3][1] = -vector3d_dot_product(yaxis, eye);
+    viewMatrix[3][2] = -vector3d_dot_product(zaxis, eye);
+    viewMatrix[3][3] = 1;
+
+    
+ /*    = {
+        vector4d(xaxis.x,            yaxis.x,            zaxis.x,      0),
+        vector4d(xaxis.y,            yaxis.y,            zaxis.y,      0),
+        vector4d(xaxis.z,            yaxis.z,            zaxis.z,      0),
+        vector4d(-dot(xaxis, eye), -dot(yaxis, eye), -dot(zaxis, eye), 1)
+    };*/
+
+    gfc_matrix_copy(gf3d_vgraphics.ubo.view, viewMatrix);
+    gfc_matrix_copy(out, viewMatrix);
 }
 
 Pipeline *gf3d_vgraphics_get_graphics_pipeline()

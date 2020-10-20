@@ -15,16 +15,15 @@ void entity_free(Entity* self) {
 	//gf2d_sprite_free(self->sprite);
 	memset(self, 0, sizeof(Entity));
 }
-void entity_free_all()
-{
-	int i;
-	for (i = 0; i < entity_manager.entity_count; i++) {
+void entity_free_all(){
+	
+	for (int i = 0; i < entity_manager.entity_count; i++) {
 		if (entity_manager.entity_list[i]._inuse) {
 			entity_free(&entity_manager.entity_list[i]);
 		}
 	}
 }
-void entity_manager_close() {
+EntityManager entity_manager_close() {
 	entity_free_all();
 	entity_manager.entity_count = 0;
 	free(entity_manager.entity_list);
@@ -38,6 +37,7 @@ void entity_init(Uint32 max) {
 	}
 
 	entity_manager.entity_list = gfc_allocate_array(sizeof(Entity), max);
+
 	if (!entity_manager.entity_list) {
 		slog("bruh moment for ent list"); 
 		return;
@@ -46,8 +46,8 @@ void entity_init(Uint32 max) {
 	entity_manager.entity_count = max;
 }
 Entity* entity_new() {
-	int i;
-	for (i = 0; i < entity_manager.entity_count; i++) {
+	
+	for (int i = 0; i < entity_manager.entity_count; i++) {
 		if (!entity_manager.entity_list[i]._inuse) {
 			entity_manager.entity_list[i]._inuse = 1;
 			gfc_matrix_identity(entity_manager.entity_list[i].modelMatrix);
@@ -58,12 +58,16 @@ Entity* entity_new() {
 
 void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
 	if (!self)return;
+	gfc_matrix_make_translation(
+		&self->modelMatrix,
+		self->position
+	);
 	gf3d_model_draw(self->model, bufferFrame, commandBuffer, self->modelMatrix);
 }
 
 void entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
-	int i;
-	for (i = 0; i < entity_manager.entity_count; i++) {
+	
+	for (int i = 0; i < entity_manager.entity_count; i++) {
 		if (entity_manager.entity_list[i]._inuse) {
 			entity_draw(&entity_manager.entity_list[i], bufferFrame, commandBuffer);
 		}
@@ -71,13 +75,13 @@ void entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
 }
 
 void entity_think_all() {
-	int i;
-	for (i = 0; i < entity_manager.entity_count; i++) {
+	
+	for (int i = 0; i < entity_manager.entity_count; i++) {
 		if (entity_manager.entity_list[i]._inuse && entity_manager.entity_list[i].think) {
 			entity_manager.entity_list[i].think(&entity_manager.entity_list[i]);
 		}
 	}
 }
-/*EntityManager *get_entity_manager(){
+EntityManager *get_entity_manager(){
 	return &entity_manager;
-}*/
+}

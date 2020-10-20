@@ -2,17 +2,24 @@
 #define __GF3D_CAMERA_H__
 
 #include "gfc_matrix.h"
+typedef struct Camera_S {
+    Matrix4 view;
+    Vector3D position;
+    Vector3D rotation;
+}Camera;
+
+Camera * gf3d_get_cam();
 
 /**
  * @brief get the current camera view
  * @param view output, the matrix provided will be populated with the current camera information
  */
-void gf3d_camera_get_view(Matrix4 view);
+void gf3d_camera_get_view(Matrix4 *view);
 
 /**
  * @brief set the current camera based on the matrix provided
  */
-void gf3d_camera_set_view(Matrix4 view);
+void gf3d_camera_set_view(Matrix4 *view);
 
 /**
  * @brief set the camera properties based on position and direction that the camera should be looking
@@ -25,7 +32,7 @@ void gf3d_camera_look_at(
     Vector3D target,
     Vector3D up
 );
-
+void gf3d_rotate_camera(Vector3D axis, float degrees);
 /**
  * @brief explicitely set the camera positon, holding all other parameters the same
  * @param position the new position for the camera

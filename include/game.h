@@ -14,4 +14,5 @@
 #include "player.h"
 
 const Uint8* keys;
+Uint32 lastUpdate;
 #endif // !1
