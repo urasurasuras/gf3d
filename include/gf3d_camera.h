@@ -2,10 +2,16 @@
 #define __GF3D_CAMERA_H__
 
 #include "gfc_matrix.h"
+#include "gf3d_vgraphics.h"
+#include "entity.h"
+
 typedef struct Camera_S {
     Matrix4 view;
     Vector3D position;
     Vector3D rotation;
+
+    Entity * player;
+
 }Camera;
 
 Camera * gf3d_get_cam();
@@ -45,4 +51,12 @@ void gf3d_camera_set_position(Vector3D position);
  */
 void gf3d_camera_move(Vector3D move);
 
+/*
+* @brief rotate camera
+* @param out Output for rotation matrix
+* @param eye Location of camera eye
+* @param pitch X axis by radians
+* @param yaw Y axis by radians
+*/
+void gf3d_camera_FPS_rotation(Matrix4 out, Vector3D eye, float pitch, float yaw);
 #endif

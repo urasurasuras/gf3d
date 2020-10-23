@@ -1,6 +1,10 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
+#include <SDL.h>            
+
+#include "simple_logger.h"
+
 #include "gfc_vector.h"
 #include "gfc_matrix.h"
 
@@ -13,6 +17,12 @@
 
 #include "player.h"
 
+#define window_W 1280
+#define window_H 720
+
 const Uint8* keys;
 Uint32 lastUpdate;
+Vector2D mousePos;
+int mx, my;
+int lastMx, lastMy;
 #endif // !1

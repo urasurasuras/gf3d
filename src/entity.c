@@ -58,6 +58,7 @@ Entity* entity_new() {
 
 void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
 	if (!self)return;
+	if (self->type == ent_PLAYER)return;
 	gfc_matrix_make_translation(
 		&self->modelMatrix,
 		self->position

@@ -111,7 +111,7 @@ void gf3d_model_delete(Model *model)
     gf3d_texture_free(model->texture);
 }
 
-void gf3d_model_draw(Model *model,Uint32 bufferFrame, VkCommandBuffer commandBuffer,Matrix4 modelMat)
+void gf3d_model_draw(Model *model, Uint32 bufferFrame, VkCommandBuffer commandBuffer,Matrix4 modelMat)
 {
     VkDescriptorSet *descriptorSet = NULL;
     if (!model)
