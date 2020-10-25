@@ -11,11 +11,16 @@
 typedef struct Entity_S {
 	Uint8 _inuse;
 	Uint8 type;
-	Vector3D position;
-	Vector3D rotation;
-	Vector3D direction;
+
 	Model* model;
 	Matrix4 modelMatrix;
+
+	// Physics
+	Vector3D position;	// Position in 3D space
+	Vector3D rotation;	// Euler rotation in radians
+	Vector3D facingDirection;	// Facing direction vector
+	Vector2D velocity;	// Moving direction
+	float speed;		// Speed multiplier
 
 	void (*think)(struct Entity_S* self);
 }Entity;

@@ -63,6 +63,14 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 		&self->modelMatrix,
 		self->position
 	);
+	//gfc_matrix_slog(self->modelMatrix);
+	/*gfc_matrix_rotate(
+		&self->modelMatrix,
+		&self->modelMatrix,
+		1,
+		vector3d(0, 1, 0)
+	);*/
+
 	gf3d_model_draw(self->model, bufferFrame, commandBuffer, self->modelMatrix);
 }
 

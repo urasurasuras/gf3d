@@ -10,7 +10,7 @@ int main(int argc,char *argv[])
 
     int half_w = window_W / 2;
     int half_h = window_H / 2;
-
+    SDL_ShowCursor(SDL_DISABLE);
     for (a = 1; a < argc;a++)
     {
         if (strcmp(argv[a],"-disable_validate") == 0)
@@ -39,37 +39,36 @@ int main(int argc,char *argv[])
     Matrix4 camMatrix;
     Model * dinoModel = gf3d_model_load("dino");
 
-    //// Create ent
+    // Create ent
     Entity* playerDino = entity_new();
     playerDino->model = dinoModel;
-    //gfc_matrix_identity(playerDino->modelMatrix);
-    //gfc_matrix_make_translation(
-    //    playerDino->modelMatrix,
-    //    vector3d(0, 0, 0)
-    //);
+    gfc_matrix_identity(playerDino->modelMatrix);
+    gfc_matrix_make_translation(
+        playerDino->modelMatrix,
+        vector3d(0, 0, 0)
+    );
     playerDino->position.y = -20;
 
-    //    // Create ent
+        // Create ent
     Entity* playerDino2 = entity_new();
     playerDino2->model = gf3d_model_load("dino");
     
-    //gfc_matrix_identity(playerDino2->modelMatrix);
-    //gfc_matrix_make_translation(
-    //    playerDino2->modelMatrix,
-    //    vector3d(0, 0, 0)
-    //);
+    gfc_matrix_identity(playerDino2->modelMatrix);
+    gfc_matrix_make_translation(
+        playerDino2->modelMatrix,
+        vector3d(0, 0, 0)
+    );
     playerDino2->position.y = 20;
 
     //    // Create ent
-    //Entity* playerDino3 = entity_new();
-    //playerDino3->model = dinoModel;
-    //gfc_matrix_identity(playerDino3->modelMatrix);
-    //gfc_matrix_make_translation(
-    //    playerDino3->modelMatrix,
-    //    vector3d(-20, 0, 0)
-    //);
-    //playerDino3->position.x = -20;
-    //playerDino3->position.y = 20;
+    //Entity* floor = entity_new();
+    //floor->model = gf3d_model_load("floor");
+    //gfc_matrix_identity(floor->modelMatrix);
+    //
+    //floor->position.x = 0;
+    //floor->position.y = 20;
+    //floor->position.z = -10;
+
     //// Create ent
     //Entity* playerDino4 = entity_new();
     //playerDino4->model = dinoModel;
@@ -86,6 +85,7 @@ int main(int argc,char *argv[])
     gf3d_get_cam()->player = player;
     player->think = player_think;
     player->type = ent_PLAYER;
+    player->speed = 0.01;
 
     // Create ent
     
@@ -123,8 +123,19 @@ int main(int argc,char *argv[])
         gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_pipeline(),bufferFrame);
             commandBuffer = gf3d_command_rendering_begin(bufferFrame);
 
-                gf3d_get_cam()->rotation.x += (mx - half_w) * 0.01;
-                gf3d_get_cam()->rotation.y += (my - half_h) * 0.01;
+            /*Matrix4 testMat;
+
+                gfc_matrix_rotate(
+                    &testMat,
+                    &testMat,
+                    0.1,
+                    vector3d(1, 0, 0)
+                );
+
+                gfc_matrix_slog(testMat);*/
+
+                gf3d_get_cam()->rotation.x += (mx - half_w) * 0.001;
+                gf3d_get_cam()->rotation.y += (my - half_h) * 0.001;
 
                 // Lock rotation
                 if (gf3d_get_cam()->rotation.y > (M_PI * .5)) {
@@ -137,7 +148,7 @@ int main(int argc,char *argv[])
                 }else if (gf3d_get_cam()->rotation.x < -M_PI) {
                     gf3d_get_cam()->rotation.x = -M_PI;
                 }*/
-                slog("Camera rotation: %.2f,%.2f", gf3d_get_cam()->rotation.x, gf3d_get_cam()->rotation.y);
+                //slog("Camera rotation: %.2f,%.2f", gf3d_get_cam()->rotation.x, gf3d_get_cam()->rotation.y);
 
                 gf3d_camera_FPS_rotation(
                     gf3d_get_cam(),
@@ -146,7 +157,7 @@ int main(int argc,char *argv[])
                     -gf3d_get_cam()->rotation.x
                 );
 
-                slog("player facing: %.2f,%.2f", player->direction.x, player->direction.y);
+                //slog("player facing: %.2f,%.2f", player->facingDirection.x, player->facingDirection.y);
 
                 //gf3d_camera_set_position(player->position);
                 gf3d_vgraphics_update_view();
@@ -156,7 +167,17 @@ int main(int argc,char *argv[])
                 //    lastUpdate = SDL_GetTicks();
                 //}
                 entity_think_all();
+                /*gfc_matrix_rotate(
+                    &floor->modelMatrix,
+                    &floor->modelMatrix,
+                    0.1,
+                    vector3d(0, 1, 0)
+                );*/
+
+                //gfc_matrix_slog(floor->modelMatrix);
                 entity_draw_all(bufferFrame, commandBuffer);
+                //gfc_matrix_slog(floor->modelMatrix);
+
 
                 SDL_WarpMouseInWindow(NULL, half_w, half_h);
                 
