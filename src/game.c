@@ -85,7 +85,7 @@ int main(int argc,char *argv[])
     gf3d_get_cam()->player = player;
     player->think = player_think;
     player->type = ent_PLAYER;
-    player->speed = 0.01;
+    player->speed = 0.1;
 
     // Create ent
     
@@ -138,10 +138,10 @@ int main(int argc,char *argv[])
                 gf3d_get_cam()->rotation.y += (my - half_h) * 0.001;
 
                 // Lock rotation
-                if (gf3d_get_cam()->rotation.y > (M_PI * .5)) {
-                    gf3d_get_cam()->rotation.y = (M_PI * .5);
-                }else if (gf3d_get_cam()->rotation.y < -(M_PI * .5)) {
-                    gf3d_get_cam()->rotation.y = -(M_PI * .5);
+                if (gf3d_get_cam()->rotation.y > GFC_HALF_PI) {
+                    gf3d_get_cam()->rotation.y = GFC_HALF_PI;
+                }else if (gf3d_get_cam()->rotation.y < - GFC_HALF_PI) {
+                    gf3d_get_cam()->rotation.y = -  GFC_HALF_PI;
                 }
                 /*if (gf3d_get_cam()->rotation.x > M_PI) {
                     gf3d_get_cam()->rotation.x = M_PI;
@@ -162,11 +162,13 @@ int main(int argc,char *argv[])
                 //gf3d_camera_set_position(player->position);
                 gf3d_vgraphics_update_view();
 
-                //// Print a report once per second
-                //if (SDL_GetTicks() > lastUpdate + 0) {
-                //    lastUpdate = SDL_GetTicks();
-                //}
-                entity_think_all();
+                // Print a report once per second
+                if (SDL_GetTicks() > lastUpdate + 0) {
+                    entity_think_all();
+                    entity_draw_all(bufferFrame, commandBuffer);
+
+                    lastUpdate = SDL_GetTicks();
+                }
                 /*gfc_matrix_rotate(
                     &floor->modelMatrix,
                     &floor->modelMatrix,
@@ -175,7 +177,6 @@ int main(int argc,char *argv[])
                 );*/
 
                 //gfc_matrix_slog(floor->modelMatrix);
-                entity_draw_all(bufferFrame, commandBuffer);
                 //gfc_matrix_slog(floor->modelMatrix);
 
 

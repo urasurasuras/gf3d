@@ -13,33 +13,39 @@ void player_think(Entity* self) {
 	//slog("vX DIR: %.2f", self->facingDirection.x);
 
 	// Set velocity vector with speed
-	if (keys[SDL_SCANCODE_W]) {
-		
-		self->velocity.x = -self->facingDirection.x;
-		self->velocity.y = -self->facingDirection.y;
+	//if (!(keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_A])) {
+		self->velocity.x = 0;
+		self->velocity.y = 0;
+	//}
+	//else {
+		Vector3D axisR = vector3d(0, 0, 0);
+		vector3d_copy(axisR, self->facingDirection);
+		axisR.x = self->facingDirection.y;
+		axisR.y = -self->facingDirection.x;
+		vector3d_slog(axisR);
+
+		if (keys[SDL_SCANCODE_W]) {
+
+			self->velocity.x += -self->facingDirection.x;
+			self->velocity.y += -self->facingDirection.y;
+		}
+		else if (keys[SDL_SCANCODE_S]) {
+			self->velocity.x += self->facingDirection.x;
+			self->velocity.y += self->facingDirection.y;
+		}
+
+		if (keys[SDL_SCANCODE_A]) {
+
+			self->velocity.x += axisR.x;
+			self->velocity.y += axisR.y;
+		}
+		else if (keys[SDL_SCANCODE_D]) {
+
+			self->velocity.x += -axisR.x;
+			self->velocity.y += -axisR.y;
+		}
 		vector2d_slog(self->velocity);
-	}
-	else if (keys[SDL_SCANCODE_S]) {
-		self->velocity.x = self->facingDirection.x;
-		self->velocity.y = self->facingDirection.y;
-	}
-	else {
-		self->velocity.x = 0;
-		self->velocity.y = 0;
-	}
-	/*	
-	if (keys[SDL_SCANCODE_A]) {
-		self->velocity.x = self->facingDirection.x;
-		self->velocity.y = self->facingDirection.y;
-	}
-	else if (keys[SDL_SCANCODE_D]) {
-		self->velocity.x = -self->facingDirection.x;
-		self->velocity.y = -self->facingDirection.y;
-	}
-	else {
-		self->velocity.x = 0;
-		self->velocity.y = 0;
-	}*/
+	//}
 
 	//slog("v: %.2f.%.2f", self->velocity.x, self->velocity.y);
 
@@ -47,20 +53,4 @@ void player_think(Entity* self) {
 	self->position.z += (self->velocity.x * self->speed);
 	self->position.x += (self->velocity.y * self->speed);
 
-	//self->position.z += self->facingDirection.x * -0.01;
-	//self->position.x += self->facingDirection.y * -0.01;
-
-	//self->position.z += velocity.y;
-
-	//vector3d_copy(self->rotation, )
-	
-	//gf3d_camera_look_at(vector3d(0, 0, 0), self->position, vector3d(0, 0, 1));
-	//gf3d_camera_set_position(self->position);
-	//// Rotate
-	//if (keys[SDL_SCANCODE_Q]) {
-	//	self->position.x += 0.1;
-	//}
-	//if (keys[SDL_SCANCODE_E]) {
-	//	self->position.x -= 0.1;
-	//}
 }
