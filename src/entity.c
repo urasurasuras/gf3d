@@ -59,18 +59,12 @@ Entity* entity_new() {
 void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
 	if (!self)return;
 	if (self->type == ent_PLAYER)return;
+
 	gfc_matrix_make_translation(
 		&self->modelMatrix,
 		self->position
 	);
-	//gfc_matrix_slog(self->modelMatrix);
-	/*gfc_matrix_rotate(
-		&self->modelMatrix,
-		&self->modelMatrix,
-		1,
-		vector3d(0, 1, 0)
-	);*/
-
+	setRotation(self->modelMatrix, self->rotation);
 	gf3d_model_draw(self->model, bufferFrame, commandBuffer, self->modelMatrix);
 }
 

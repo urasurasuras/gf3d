@@ -5,5 +5,6 @@
 #include "entity.h"
 
 void player_think(Entity* Self);
+void dino_think(Entity* self);
 
 #endif // !1

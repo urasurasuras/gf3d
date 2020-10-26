@@ -55,3 +55,7 @@ void player_think(Entity* self) {
 	self->position.x += (self->velocity.y * self->speed * gameManager()->deltaTime);
 
 }
+
+void dino_think(Entity* self) {
+	self->rotation.z += 0.01;
+}

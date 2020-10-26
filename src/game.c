@@ -62,6 +62,8 @@ int main(int argc,char *argv[])
         vector3d(0, 0, 0)
     );
     playerDino2->position.y = 20;
+    playerDino2->think = dino_think;
+    playerDino->think = dino_think;
 
     //    // Create ent
     //Entity* floor = entity_new();
