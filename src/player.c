@@ -1,7 +1,8 @@
 #include "player.h"
 #include "simple_logger.h"
 void player_think(Entity* self) {
-	
+	slog("Delta time: %f", gameManager()->deltaTime);
+
 	// Set rotaion
 	self->rotation.x = -gf3d_get_cam()->rotation.x;
 	//self->rotation.z = my;
@@ -50,7 +51,7 @@ void player_think(Entity* self) {
 	//slog("v: %.2f.%.2f", self->velocity.x, self->velocity.y);
 
 	//velocity.x
-	self->position.z += (self->velocity.x * self->speed);
-	self->position.x += (self->velocity.y * self->speed);
+	self->position.z += (self->velocity.x * self->speed * gameManager()->deltaTime);
+	self->position.x += (self->velocity.y * self->speed * gameManager()->deltaTime);
 
 }

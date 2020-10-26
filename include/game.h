@@ -20,9 +20,17 @@
 #define window_W 1280
 #define window_H 720
 
+typedef struct GameManager_S {
+	Uint32 lastUpdate;
+	float deltaTime;
+	Vector2D mousePos;
+	int mx, my;
+	int lastMx, lastMy;
+}GameManager;
+
 const Uint8* keys;
-Uint32 lastUpdate;
-Vector2D mousePos;
-int mx, my;
-int lastMx, lastMy;
+
+static GameManager game_manager = { 0 };
+
+GameManager* gameManager();
 #endif // !1

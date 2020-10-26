@@ -8,6 +8,9 @@ int main(int argc,char *argv[])
     Uint32 bufferFrame = 0;
     VkCommandBuffer commandBuffer;
 
+    Uint32 LAST =0;
+    Uint32 NOW =0;
+
     int half_w = window_W / 2;
     int half_h = window_H / 2;
     SDL_ShowCursor(SDL_DISABLE);
@@ -34,8 +37,8 @@ int main(int argc,char *argv[])
     entity_init(32);
 
 
-    lastMx = 0;
-    lastMy = 0;
+    gameManager()->lastMx = 0;
+    gameManager()->lastMy = 0;
     Matrix4 camMatrix;
     Model * dinoModel = gf3d_model_load("dino");
 
@@ -85,11 +88,7 @@ int main(int argc,char *argv[])
     gf3d_get_cam()->player = player;
     player->think = player_think;
     player->type = ent_PLAYER;
-    player->speed = 0.1;
-
-    // Create ent
-    
-    
+    player->speed = 10;            
 
     // main game loop
     slog("gf3d main loop begin");
@@ -100,88 +99,50 @@ int main(int argc,char *argv[])
         SDL_PumpEvents();   // update SDL's internal event structures
         keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
         //SDL_GetRelativeMouseState(&lastMx, &lastMy);
-        SDL_GetMouseState(&mx, &my);
+        SDL_GetMouseState(&gameManager()->mx, &gameManager()->my);
 
         //update game things here
 
-        Vector3D camMove = { 1,1,1 };
-        //gf3d_camera_move(camMove);
-     /*   gfc_matrix_rotate(
-            modelMat,
-            modelMat,
-            0.002,
-            vector3d(1,0,0));
-        gfc_matrix_rotate(
-            modelMat2,
-            modelMat2,
-            0.002,
-            vector3d(0,0,1));*/
-        
+        gf3d_get_cam()->rotation.x += (gameManager()->mx - half_w) * 0.001;
+        gf3d_get_cam()->rotation.y += (gameManager()->my - half_h) * 0.001;
+
+        // Lock rotation
+        if (gf3d_get_cam()->rotation.y > GFC_HALF_PI) {
+            gf3d_get_cam()->rotation.y = GFC_HALF_PI;
+        }
+        else if (gf3d_get_cam()->rotation.y < -GFC_HALF_PI) {
+            gf3d_get_cam()->rotation.y = -GFC_HALF_PI;
+        }
+
+        gf3d_camera_FPS_rotation(
+            gf3d_get_cam(),
+            player->position,
+            -gf3d_get_cam()->rotation.y,
+            -gf3d_get_cam()->rotation.x
+        );
+
+        gf3d_vgraphics_update_view();
+        // Print a report once per second
+        if (SDL_GetTicks() > gameManager()->lastUpdate + 0) {
+
+        }
+        entity_think_all();
+
+        LAST = NOW;
+        NOW = SDL_GetPerformanceCounter();
+
+        gameManager()->deltaTime = ((float)(NOW - LAST) / (float)SDL_GetPerformanceFrequency());
+
+        SDL_WarpMouseInWindow(NULL, half_w, half_h);
+
         // configure render command for graphics command pool
         // for each mesh, get a command and configure it from the pool
         bufferFrame = gf3d_vgraphics_render_begin();
         gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_pipeline(),bufferFrame);
             commandBuffer = gf3d_command_rendering_begin(bufferFrame);
 
-            /*Matrix4 testMat;
+            entity_draw_all(bufferFrame, commandBuffer);
 
-                gfc_matrix_rotate(
-                    &testMat,
-                    &testMat,
-                    0.1,
-                    vector3d(1, 0, 0)
-                );
-
-                gfc_matrix_slog(testMat);*/
-
-                gf3d_get_cam()->rotation.x += (mx - half_w) * 0.001;
-                gf3d_get_cam()->rotation.y += (my - half_h) * 0.001;
-
-                // Lock rotation
-                if (gf3d_get_cam()->rotation.y > GFC_HALF_PI) {
-                    gf3d_get_cam()->rotation.y = GFC_HALF_PI;
-                }else if (gf3d_get_cam()->rotation.y < - GFC_HALF_PI) {
-                    gf3d_get_cam()->rotation.y = -  GFC_HALF_PI;
-                }
-                /*if (gf3d_get_cam()->rotation.x > M_PI) {
-                    gf3d_get_cam()->rotation.x = M_PI;
-                }else if (gf3d_get_cam()->rotation.x < -M_PI) {
-                    gf3d_get_cam()->rotation.x = -M_PI;
-                }*/
-                //slog("Camera rotation: %.2f,%.2f", gf3d_get_cam()->rotation.x, gf3d_get_cam()->rotation.y);
-
-                gf3d_camera_FPS_rotation(
-                    gf3d_get_cam(),
-                    player->position,
-                    -gf3d_get_cam()->rotation.y,
-                    -gf3d_get_cam()->rotation.x
-                );
-
-                //slog("player facing: %.2f,%.2f", player->facingDirection.x, player->facingDirection.y);
-
-                //gf3d_camera_set_position(player->position);
-                gf3d_vgraphics_update_view();
-
-                // Print a report once per second
-                if (SDL_GetTicks() > lastUpdate + 0) {
-                    entity_think_all();
-                    entity_draw_all(bufferFrame, commandBuffer);
-
-                    lastUpdate = SDL_GetTicks();
-                }
-                /*gfc_matrix_rotate(
-                    &floor->modelMatrix,
-                    &floor->modelMatrix,
-                    0.1,
-                    vector3d(0, 1, 0)
-                );*/
-
-                //gfc_matrix_slog(floor->modelMatrix);
-                //gfc_matrix_slog(floor->modelMatrix);
-
-
-                SDL_WarpMouseInWindow(NULL, half_w, half_h);
-                
             gf3d_command_rendering_end(commandBuffer);
             
         gf3d_vgraphics_render_end(bufferFrame);
@@ -196,4 +157,7 @@ int main(int argc,char *argv[])
     return 0;
 }
 
+GameManager* gameManager() {
+    return &game_manager;
+}
 /*eol@eof*/

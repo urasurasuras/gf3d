@@ -64,6 +64,8 @@ typedef struct
     
     Command                 *   graphicsCommandPool; 
     UniformBufferObject         ubo;
+
+    SDL_Renderer            *   sdlRenderer;
 }vGraphics;
 
 static vGraphics gf3d_vgraphics = {0};
