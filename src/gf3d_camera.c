@@ -65,7 +65,6 @@ void gf3d_camera_move(Vector3D move)
 // Pitch and yaw variables must be expressed in radians.
 void gf3d_camera_FPS_rotation(Matrix4 out, Vector3D eye, float pitch, float yaw)
 {
-
     // I assume the values are already converted to radians.
     float cosPitch = cos(pitch);
     float sinPitch = sin(pitch);

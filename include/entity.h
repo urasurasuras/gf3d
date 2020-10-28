@@ -12,8 +12,11 @@ typedef struct Entity_S {
 	Uint8 _inuse;
 	Uint8 type;
 
+	// Model
 	Model* model;
 	Matrix4 modelMatrix;
+	Vector3D modelPosOffset;	// Model position offset
+	Vector3D modelRotOffset;	// Model rotation offset 
 
 	// Physics
 	Vector3D position;	// Position in 3D space
@@ -22,11 +25,11 @@ typedef struct Entity_S {
 	Vector2D velocity;	// Moving direction
 	float speed;		// Speed multiplier
 
-	void (*think)(struct Entity_S* self);
+	void (*think)(struct Entity_S* self, float deltaTime);
 }Entity;
 
 void entity_init(Uint32 max);
 Entity* entity_new();
 void entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer);
-void entity_think_all();
+void entity_think_all(float deltaTime);
 #endif // !_ENTITY_H_

@@ -118,7 +118,7 @@ void gf3d_vgraphics_init(
         45 * GFC_DEGTORAD,
         renderWidth/(float)renderHeight,
         0.1f,
-        100
+        200
     );
     
     gf3d_vgraphics.ubo.proj[1][1] *= -1;
@@ -689,7 +689,6 @@ void gf3d_vgraphics_update_view() {
     // Copy rotation
     gfc_matrix_copy(gf3d_vgraphics.ubo.view, gf3d_get_cam()->view);
     // Copy position
-
 }
 
 Pipeline *gf3d_vgraphics_get_graphics_pipeline()

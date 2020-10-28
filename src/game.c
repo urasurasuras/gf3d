@@ -1,20 +1,22 @@
 #include "game.h"
 #include "gfc_matrix.h"
 
-void floor_rotate(Entity* self) {
+void floor_rotate(Entity* self, float deltaTime) {
     if (keys[SDL_SCANCODE_Q]) {
-        self->rotation.x += (gameManager()->deltaTime);
+        self->rotation.x += (deltaTime);
     }
     else if (keys[SDL_SCANCODE_E]) {
-        self->rotation.y += (gameManager()->deltaTime);
+        self->rotation.y += (deltaTime);
     }
     else if (keys[SDL_SCANCODE_Z]) {
-        self->position.z -= (gameManager()->deltaTime *5);
+        self->position.z -= (deltaTime *5);
     }
 }
+
 int main(int argc,char *argv[])
 {
     int done = 0;
+    int play = 0;
     int a;
     Uint8 validate = 1;
     Uint32 bufferFrame = 0;
@@ -51,60 +53,43 @@ int main(int argc,char *argv[])
 
     gameManager()->lastMx = 0;
     gameManager()->lastMy = 0;
+    gameManager()->deltaTime = 0;
     Matrix4 camMatrix;
     Model * dinoModel = gf3d_model_load("dino");
+
+    // Create PLAYER
+    Entity* player = entity_new();
+    gf3d_get_cam()->player = player;
+    player->think = player_think;
+    player->type = ent_PLAYER;
+    player->speed = 20;
+    player->position.y = 10;
 
     // Create ent
     Entity* playerDino = entity_new();
     playerDino->model = dinoModel;
     playerDino->position.y = -20;
+    playerDino->position.z = 6;
+    playerDino->position.x = 0;
 
-    gfc_matrix_identity(playerDino->modelMatrix);
-    gfc_matrix_make_translation(
-        playerDino->modelMatrix,
-        playerDino->position
-    );
+    playerDino->rotation = vector3d(0, 0, 0);
 
     // Create ent
     Entity* playerDino2 = entity_new();
     playerDino2->model = gf3d_model_load("dino");
-    
-    gfc_matrix_identity(playerDino2->modelMatrix);
-    gfc_matrix_make_translation(
-        playerDino2->modelMatrix,
-        vector3d(0, 0, 0)
-    );
     playerDino2->position.y = 20;
-    playerDino2->think = floor_rotate;
-    playerDino->think = floor_rotate;
+    playerDino2->position.z = 6;
+    playerDino2->position.x = 0;
+    playerDino2->think = dino_think;
+    playerDino->think = dino_think;
     
-    // Create ent
+    // Create FLOOR
     Entity* floor = entity_new();
     floor->model = gf3d_model_load("floor");
-    
-    //floor->position.y = 20;
-    floor->position.z = -10;
 
-    //// Create ent
-    //Entity* playerDino4 = entity_new();
-    //playerDino4->model = dinoModel;
-    //gfc_matrix_identity(playerDino4->modelMatrix);
-    //gfc_matrix_make_translation(
-    //    playerDino4->modelMatrix,
-    //    vector3d(-20, 0, 0)
-    //);
-    //playerDino4->position.x = 20;
-    //playerDino4->position.y = 20;
-
-    // Create player
-    Entity* player = entity_new();
-    gf3d_get_cam()->player = player;
-    player->think = player_think;
-    player->type = ent_PLAYER;
-    player->speed = 10;            
 
     // main game loop
-    slog("gf3d main loop begin");
+    slog("MAIN LOOP BEGIN");
 	slog_sync();
 
     while(!done)
@@ -114,8 +99,12 @@ int main(int argc,char *argv[])
         //SDL_GetRelativeMouseState(&lastMx, &lastMy);
         SDL_GetMouseState(&gameManager()->mx, &gameManager()->my);
 
+        if (keys[SDL_SCANCODE_TAB]) {
+            play = 1;
+        }
         //update game things here
-
+        slog("deltaTime: %f", gameManager()->deltaTime);
+        // Get mouse input delta
         gf3d_get_cam()->rotation.x += (gameManager()->mx - half_w) * 0.001;
         gf3d_get_cam()->rotation.y += (gameManager()->my - half_h) * 0.001;
 
@@ -135,16 +124,16 @@ int main(int argc,char *argv[])
         );
 
         gf3d_vgraphics_update_view();
-        // Print a report once per second
-        if (SDL_GetTicks() > gameManager()->lastUpdate + 0) {
 
-        }
-        entity_think_all();
 
         LAST = NOW;
         NOW = SDL_GetPerformanceCounter();
 
         gameManager()->deltaTime = ((float)(NOW - LAST) / (float)SDL_GetPerformanceFrequency());
+
+        if (play) {
+            entity_think_all(gameManager()->deltaTime);
+        }
 
         SDL_WarpMouseInWindow(NULL, half_w, half_h);
 
@@ -165,11 +154,13 @@ int main(int argc,char *argv[])
     
     vkDeviceWaitIdle(gf3d_vgraphics_get_default_logical_device());    
     //cleanup
-    slog("gf3d program end");
+    slog("gf3d PROGRAM END");
     slog_sync();
     return 0;
 }
+void startGame() {
 
+}
 GameManager* gameManager() {
     return &game_manager;
 }

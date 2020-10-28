@@ -49,8 +49,16 @@ Entity* entity_new() {
 	
 	for (int i = 0; i < entity_manager.entity_count; i++) {
 		if (!entity_manager.entity_list[i]._inuse) {
+			// Mark _inuse
 			entity_manager.entity_list[i]._inuse = 1;
-			gfc_matrix_identity(entity_manager.entity_list[i].modelMatrix);
+
+			gfc_matrix_identity(entity_manager.entity_list[i].modelMatrix);// Init matrix
+			entity_manager.entity_list[i].position = vector3d(0, 0, 0);// Init pos
+			entity_manager.entity_list[i].rotation = vector3d(0, 0, 0);// Init rotation
+			entity_manager.entity_list[i].speed = 10;// Init speed
+			// Set facing direction to rotation
+			entity_manager.entity_list[i].facingDirection.x = cos(entity_manager.entity_list[i].rotation.x);
+			entity_manager.entity_list[i].facingDirection.y = sin(entity_manager.entity_list[i].rotation.x);
 			return &entity_manager.entity_list[i];
 		}
 	}
@@ -60,10 +68,14 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 	if (!self)return;
 	if (self->type == ent_PLAYER)return;
 
+	Vector3D drawpos;
+
+	vector3d_add(drawpos, self->position, self->modelPosOffset);
 	gfc_matrix_make_translation(
 		&self->modelMatrix,
-		self->position
+		drawpos
 	);
+
 	setRotation(self->modelMatrix, self->rotation);
 
 	gf3d_model_draw(self->model, bufferFrame, commandBuffer, self->modelMatrix);
@@ -78,11 +90,11 @@ void entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
 	}
 }
 
-void entity_think_all() {
+void entity_think_all(float deltaTime) {
 	
 	for (int i = 0; i < entity_manager.entity_count; i++) {
 		if (entity_manager.entity_list[i]._inuse && entity_manager.entity_list[i].think) {
-			entity_manager.entity_list[i].think(&entity_manager.entity_list[i]);
+			entity_manager.entity_list[i].think(&entity_manager.entity_list[i], deltaTime);
 		}
 	}
 }

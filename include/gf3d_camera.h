@@ -52,7 +52,7 @@ void gf3d_camera_set_position(Vector3D position);
 void gf3d_camera_move(Vector3D move);
 
 /*
-* @brief rotate camera
+* @brief Rotate view matrix based on the camera rotation
 * @param out Output for rotation matrix
 * @param eye Location of camera eye
 * @param pitch X axis by radians
