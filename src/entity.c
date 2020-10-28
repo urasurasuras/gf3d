@@ -65,6 +65,7 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 		self->position
 	);
 	setRotation(self->modelMatrix, self->rotation);
+
 	gf3d_model_draw(self->model, bufferFrame, commandBuffer, self->modelMatrix);
 }
 

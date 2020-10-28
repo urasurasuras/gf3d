@@ -1,5 +1,17 @@
 #include "game.h"
+#include "gfc_matrix.h"
 
+void floor_rotate(Entity* self) {
+    if (keys[SDL_SCANCODE_Q]) {
+        self->rotation.x += (gameManager()->deltaTime);
+    }
+    else if (keys[SDL_SCANCODE_E]) {
+        self->rotation.y += (gameManager()->deltaTime);
+    }
+    else if (keys[SDL_SCANCODE_Z]) {
+        self->position.z -= (gameManager()->deltaTime *5);
+    }
+}
 int main(int argc,char *argv[])
 {
     int done = 0;
@@ -45,14 +57,15 @@ int main(int argc,char *argv[])
     // Create ent
     Entity* playerDino = entity_new();
     playerDino->model = dinoModel;
+    playerDino->position.y = -20;
+
     gfc_matrix_identity(playerDino->modelMatrix);
     gfc_matrix_make_translation(
         playerDino->modelMatrix,
-        vector3d(0, 0, 0)
+        playerDino->position
     );
-    playerDino->position.y = -20;
 
-        // Create ent
+    // Create ent
     Entity* playerDino2 = entity_new();
     playerDino2->model = gf3d_model_load("dino");
     
@@ -62,17 +75,15 @@ int main(int argc,char *argv[])
         vector3d(0, 0, 0)
     );
     playerDino2->position.y = 20;
-    playerDino2->think = dino_think;
-    playerDino->think = dino_think;
-
-    //    // Create ent
-    //Entity* floor = entity_new();
-    //floor->model = gf3d_model_load("floor");
-    //gfc_matrix_identity(floor->modelMatrix);
-    //
-    //floor->position.x = 0;
+    playerDino2->think = floor_rotate;
+    playerDino->think = floor_rotate;
+    
+    // Create ent
+    Entity* floor = entity_new();
+    floor->model = gf3d_model_load("floor");
+    
     //floor->position.y = 20;
-    //floor->position.z = -10;
+    floor->position.z = -10;
 
     //// Create ent
     //Entity* playerDino4 = entity_new();
