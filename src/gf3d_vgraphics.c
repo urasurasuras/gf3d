@@ -111,7 +111,7 @@ void gf3d_vgraphics_init(
         gf3d_vgraphics.ubo.view,
         vector3d(0,20,0),
         vector3d(0,0,0),
-        vector3d(0,0,1)
+        vector3d(0,1,0)
     );
     gfc_matrix_perspective(
         gf3d_vgraphics.ubo.proj,

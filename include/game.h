@@ -21,6 +21,8 @@
 #define window_H 720
 
 typedef struct GameManager_S {
+	Entity * player;
+
 	Uint32 lastUpdate;
 	float deltaTime;
 	Vector2D mousePos;

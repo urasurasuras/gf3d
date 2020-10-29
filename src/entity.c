@@ -68,15 +68,16 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 	if (!self)return;
 	if (self->type == ent_PLAYER)return;
 
-	Vector3D drawpos;
-
-	vector3d_add(drawpos, self->position, self->modelPosOffset);
+	Vector3D drawPos;
+	vector3d_add(drawPos, self->position, self->modelPosOffset);
 	gfc_matrix_make_translation(
 		&self->modelMatrix,
-		drawpos
+		drawPos
 	);
 
-	setRotation(self->modelMatrix, self->rotation);
+	Vector3D drawRot;
+	vector3d_add(drawRot, self->rotation, self->modelRotOffset);
+	setRotation(self->modelMatrix, drawRot);
 
 	gf3d_model_draw(self->model, bufferFrame, commandBuffer, self->modelMatrix);
 }

@@ -63,25 +63,27 @@ int main(int argc,char *argv[])
     player->think = player_think;
     player->type = ent_PLAYER;
     player->speed = 20;
-    player->position.y = 10;
+    player->position.y = 5;
+    gameManager()->player = player;
 
     // Create ent
-    Entity* playerDino = entity_new();
-    playerDino->model = dinoModel;
-    playerDino->position.y = -20;
-    playerDino->position.z = 6;
-    playerDino->position.x = 0;
+    Entity* dino = entity_new();
+    dino->model = dinoModel;
+    dino->position.y = 6;
+    dino->position.z = 6;
+    dino->position.x = 0;
+    dino->think = dino_think;
+    dino->modelRotOffset = vector3d(0, -GFC_HALF_PI, 0);
 
-    playerDino->rotation = vector3d(0, 0, 0);
+    //// Create ent
+    //Entity* dino2 = entity_new();
+    //dino2->model = gf3d_model_load("dino");
+    //dino2->position.y = 20;
+    //dino2->position.z = 6;
+    //dino2->position.x = 0;
+    //dino2->think = dino_think;
+    //dino2->modelRotOffset = vector3d(0, -GFC_HALF_PI, 0);
 
-    // Create ent
-    Entity* playerDino2 = entity_new();
-    playerDino2->model = gf3d_model_load("dino");
-    playerDino2->position.y = 20;
-    playerDino2->position.z = 6;
-    playerDino2->position.x = 0;
-    playerDino2->think = dino_think;
-    playerDino->think = dino_think;
     
     // Create FLOOR
     Entity* floor = entity_new();
@@ -99,28 +101,28 @@ int main(int argc,char *argv[])
         //SDL_GetRelativeMouseState(&lastMx, &lastMy);
         SDL_GetMouseState(&gameManager()->mx, &gameManager()->my);
 
-        if (keys[SDL_SCANCODE_TAB]) {
-            play = 1;
-        }
         //update game things here
-        slog("deltaTime: %f", gameManager()->deltaTime);
+        //slog("deltaTime: %f", gameManager()->deltaTime);
         // Get mouse input delta
-        gf3d_get_cam()->rotation.x += (gameManager()->mx - half_w) * 0.001;
-        gf3d_get_cam()->rotation.y += (gameManager()->my - half_h) * 0.001;
+        player->rotation.y += (gameManager()->mx - half_w) * 0.001;
+        player->rotation.x += (gameManager()->my - half_h) * 0.001;
+
+        gf3d_get_cam()->rotation.x = player->rotation.x;
+        gf3d_get_cam()->rotation.y = player->rotation.y;
 
         // Lock rotation
-        if (gf3d_get_cam()->rotation.y > GFC_HALF_PI) {
-            gf3d_get_cam()->rotation.y = GFC_HALF_PI;
+        if (player->rotation.x > GFC_HALF_PI) {
+            player->rotation.x = GFC_HALF_PI;
         }
-        else if (gf3d_get_cam()->rotation.y < -GFC_HALF_PI) {
-            gf3d_get_cam()->rotation.y = -GFC_HALF_PI;
+        else if (player->rotation.x < -GFC_HALF_PI) {
+            player->rotation.x = -GFC_HALF_PI;
         }
 
         gf3d_camera_FPS_rotation(
             gf3d_get_cam(),
             player->position,
-            -gf3d_get_cam()->rotation.y,
-            -gf3d_get_cam()->rotation.x
+            -gf3d_get_cam()->rotation.x,
+            -gf3d_get_cam()->rotation.y
         );
 
         gf3d_vgraphics_update_view();
@@ -149,6 +151,7 @@ int main(int argc,char *argv[])
             
         gf3d_vgraphics_render_end(bufferFrame);
 
+        play = 1; // start game after we are done with the first game loop
         if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
     }    
     
