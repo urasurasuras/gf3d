@@ -22,7 +22,7 @@ typedef struct Entity_S {
 	Vector3D position;	// Position in 3D space
 	Vector3D rotation;	// Euler rotation in radians
 	Vector3D facingDirection;	// Facing direction vector
-	Vector2D velocity;	// Moving direction
+	Vector3D velocity;	// Moving direction
 	float speed;		// Speed multiplier
 
 	void (*think)(struct Entity_S* self, float deltaTime);
