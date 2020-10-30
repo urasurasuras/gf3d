@@ -109,8 +109,8 @@ void gf3d_vgraphics_init(
     gfc_matrix_identity(gf3d_vgraphics.ubo.proj);
     gfc_matrix_view(
         gf3d_vgraphics.ubo.view,
-        vector3d(0,20,0),
         vector3d(0,0,0),
+        vector3d(0,0,20),
         vector3d(0,1,0)
     );
     gfc_matrix_perspective(
@@ -680,13 +680,19 @@ void gf3d_vgraphics_rotate_camera(Vector3D axis, float degrees)
     //gf3d_vgraphics.ubo.view[2][1] = 1;
     //gf3d_vgraphics.ubo.view[2][2] = 0;
     gf3d_camera_set_view(&gf3d_vgraphics.ubo.view);    
-    gfc_matrix_slog(gf3d_vgraphics.ubo.view);
+    //gfc_matrix_slog(gf3d_vgraphics.ubo.view);
 }
 
-
-
 void gf3d_vgraphics_update_view() {
+    Matrix4 cam, ubo;
+    gfc_matrix_copy(cam, gf3d_get_cam()->view);
+    gfc_matrix_copy(ubo, gf3d_vgraphics.ubo.view);
+    //gfc_matrix_slog(ubo);
     // Copy rotation
+    Matrix4 * uboView;
+    uboView = gf3d_vgraphics.ubo.view;
+
+    //uboView[0][0] = gf3d_get_cam()->view[0][0];
     gfc_matrix_copy(gf3d_vgraphics.ubo.view, gf3d_get_cam()->view);
     // Copy position
 }

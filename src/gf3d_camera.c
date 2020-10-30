@@ -80,19 +80,19 @@ void gf3d_camera_FPS_rotation(Matrix4 out, Vector3D eye, float pitch, float yaw)
     // Create a 4x4 view matrix from the right, up, forward and eye position vectors
     Matrix4 viewMatrix;
 
-    viewMatrix[0][0] = xaxis.z;
-    viewMatrix[0][1] = yaxis.z;
-    viewMatrix[0][2] = zaxis.z;
+    viewMatrix[0][0] = xaxis.x;
+    viewMatrix[0][1] = yaxis.x;
+    viewMatrix[0][2] = zaxis.x;
     viewMatrix[0][3] = 0;
 
-    viewMatrix[1][0] = xaxis.x;
-    viewMatrix[1][1] = yaxis.x;
-    viewMatrix[1][2] = zaxis.x;
+    viewMatrix[1][0] = xaxis.y;
+    viewMatrix[1][1] = yaxis.y;
+    viewMatrix[1][2] = zaxis.y;
     viewMatrix[1][3] = 0;
 
-    viewMatrix[2][0] = xaxis.y;
-    viewMatrix[2][1] = yaxis.y;
-    viewMatrix[2][2] = zaxis.y;
+    viewMatrix[2][0] = xaxis.z;
+    viewMatrix[2][1] = yaxis.z;
+    viewMatrix[2][2] = zaxis.z;
     viewMatrix[2][3] = 0;
 
     viewMatrix[3][0] = -vector3d_dot_product(xaxis, eye);

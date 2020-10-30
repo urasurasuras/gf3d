@@ -9,7 +9,7 @@ void floor_rotate(Entity* self, float deltaTime) {
         self->rotation.y += (deltaTime);
     }
     else if (keys[SDL_SCANCODE_Z]) {
-        self->position.z -= (deltaTime *5);
+        self->rotation.z += (deltaTime);
     }
 }
 
@@ -63,7 +63,9 @@ int main(int argc,char *argv[])
     player->think = player_think;
     player->type = ent_PLAYER;
     player->speed = 20;
+    player->position.x = 5;
     player->position.y = 5;
+    player->position.z = 5;
     gameManager()->player = player;
 
     // Create ent
@@ -73,7 +75,7 @@ int main(int argc,char *argv[])
     dino->position.z = 6;
     dino->position.x = 0;
     dino->think = dino_think;
-    dino->modelRotOffset = vector3d(0, -GFC_HALF_PI, 0);
+    dino->modelRotOffset = vector3d(GFC_HALF_PI,-GFC_HALF_PI,0);
 
     //// Create ent
     //Entity* dino2 = entity_new();
@@ -88,7 +90,8 @@ int main(int argc,char *argv[])
     // Create FLOOR
     Entity* floor = entity_new();
     floor->model = gf3d_model_load("floor");
-
+    floor->modelRotOffset = vector3d(GFC_HALF_PI, 0, 0);
+    //floor->think = floor_rotate;
 
     // main game loop
     slog("MAIN LOOP BEGIN");
@@ -104,8 +107,8 @@ int main(int argc,char *argv[])
         //update game things here
         //slog("deltaTime: %f", gameManager()->deltaTime);
         // Get mouse input delta
-        player->rotation.y += (gameManager()->mx - half_w) * 0.001;
-        player->rotation.x += (gameManager()->my - half_h) * 0.001;
+        player->rotation.x += (gameManager()->my - half_h) * 0.001;// V look (pitch)
+        player->rotation.y += (gameManager()->mx - half_w) * 0.001;// H look (yaw)
 
         gf3d_get_cam()->rotation.x = player->rotation.x;
         gf3d_get_cam()->rotation.y = player->rotation.y;
@@ -125,7 +128,6 @@ int main(int argc,char *argv[])
             -gf3d_get_cam()->rotation.y
         );
 
-        gf3d_vgraphics_update_view();
 
 
         LAST = NOW;
@@ -144,6 +146,8 @@ int main(int argc,char *argv[])
         bufferFrame = gf3d_vgraphics_render_begin();
         gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_pipeline(),bufferFrame);
             commandBuffer = gf3d_command_rendering_begin(bufferFrame);
+
+            gf3d_vgraphics_update_view();
 
             entity_draw_all(bufferFrame, commandBuffer);
 

@@ -77,7 +77,7 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 
 	Vector3D drawRot;
 	vector3d_add(drawRot, self->rotation, self->modelRotOffset);
-	setRotation(self->modelMatrix, drawRot);
+	setRotation_model(self->modelMatrix, drawRot);
 
 	gf3d_model_draw(self->model, bufferFrame, commandBuffer, self->modelMatrix);
 }
