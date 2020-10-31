@@ -1,59 +1,63 @@
 #include "player.h"
 #include "simple_logger.h"
 void player_think(Entity* self, float deltaTime) {	
+	Character* character = (Character*)self->data;
 
 	// Set facing direction to rotation
-	self->facingDirection.x = cos(self->rotation.y);
-	self->facingDirection.z = sin(self->rotation.y);
-	//vector3d_slog(self->facingDirection);
+	character->facingDirection.x = cos(self->rotation.y) * cos(self->rotation.x);
+	character->facingDirection.y = cos(self->rotation.y) * sin(self->rotation.x);
+	character->facingDirection.z = sin(self->rotation.y);
+	//slog("Rotation:");
+	//vector3d_slog(self->rotation);
+	//slog("Direction:");
+	//vector3d_slog(character->facingDirection);
 
 	// Set velocity vector with speed
-	self->velocity.x = 0;
-	self->velocity.z = 0;
+	character->velocity.x = 0;
+	character->velocity.z = 0;
 
 	Vector3D axisR = vector3d(0, 0, 0);
-	vector3d_copy(axisR, self->facingDirection);
-	axisR.x = self->facingDirection.z;
-	axisR.z = -self->facingDirection.x;
+	vector3d_copy(axisR, character->facingDirection);
+	axisR.x = character->facingDirection.z;
+	axisR.z = -character->facingDirection.x;
 
 	if (keys[SDL_SCANCODE_W]) {
 		// Set velocity to facing dir
-		self->velocity.x = self->facingDirection.x;
-		self->velocity.z = self->facingDirection.z;
+		character->velocity.x = character->facingDirection.x;
+		character->velocity.z = character->facingDirection.z;
 	}
 	else if (keys[SDL_SCANCODE_S]) {
-		self->velocity.x -= self->facingDirection.x;
-		self->velocity.z -= self->facingDirection.z;
+		character->velocity.x -= character->facingDirection.x;
+		character->velocity.z -= character->facingDirection.z;
 	}
 
 	if (keys[SDL_SCANCODE_A]) {
 
-		self->velocity.x += axisR.x;
-		self->velocity.z += axisR.z;
+		character->velocity.x += axisR.x;
+		character->velocity.z += axisR.z;
 	}
 	else if (keys[SDL_SCANCODE_D]) {
 
-		self->velocity.x -= axisR.x;
-		self->velocity.z -= axisR.z;
+		character->velocity.x -= axisR.x;
+		character->velocity.z -= axisR.z;
 	}
-	vector3d_slog(self->facingDirection);
+	//vector3d_slog(character->facingDirection);
 
 	entity_move(self, deltaTime);
 }
 
-void entity_raycast();
 void entity_move(Entity * self) {
-
+	Character * character = self->data;
 
 	// Increment position from velocity
-	self->position.x += (self->velocity.x * self->speed * gameManager()->deltaTime);
-	self->position.z += (self->velocity.z * self->speed * gameManager()->deltaTime);
+	self->position.x += (character->velocity.x * character->speed * gameManager()->deltaTime);
+	self->position.z += (character->velocity.z * character->speed * gameManager()->deltaTime);
 	//vector3d_slog(self->position);
 
 }
 
 void dino_think(Entity * self, float deltaTime) {
-
+	Character * character = (Character*)self->data;
 
 	Vector2D distance;
 	distance.x = gameManager()->player->position.x - self->position.x;
@@ -71,12 +75,12 @@ void dino_think(Entity * self, float deltaTime) {
 	//self->rotation.y += (deltaTime);
 
 	// Set facing direction to rotation
-	self->facingDirection.x = cos(self->rotation.y);
-	self->facingDirection.z = sin(self->rotation.y);	
+	character->facingDirection.x = cos(self->rotation.y);
+	character->facingDirection.z = sin(self->rotation.y);
 
 	// Set velocity to facing dir
-	self->velocity.x = self->facingDirection.x;
-	self->velocity.z = self->facingDirection.z;
+	character->velocity.x = character->facingDirection.x;
+	character->velocity.z = character->facingDirection.z;
 
 	//vector3d_sub(self->rotation, gameManager()->player->position, self->position);
 	entity_move(self);

@@ -19,9 +19,18 @@
 
 #define window_W 1280
 #define window_H 720
+//
+//typedef struct Level_S {
+//	Model* model;
+//	Matrix4 modelMatrix;
+//	Vector3D modelPosOffset;	// Model position offset
+//	Vector3D modelRotOffset;	// Model rotation offset 
+//
+//}Level;
 
 typedef struct GameManager_S {
 	Entity * player;
+	Level * level;
 
 	Uint32 lastUpdate;
 	float deltaTime;
@@ -30,9 +39,12 @@ typedef struct GameManager_S {
 	int lastMx, lastMy;
 }GameManager;
 
+
 const Uint8* keys;
 
 static GameManager game_manager = { 0 };
+static Level* level = { 0 };
 
 GameManager* gameManager();
+//Level* level();
 #endif // !1

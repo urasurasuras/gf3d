@@ -59,28 +59,35 @@ int main(int argc,char *argv[])
 
     // Create PLAYER
     Entity* player = entity_new();
+    player->data = malloc(sizeof(Character));
+    Character* playerData = (Character*)player->data;
     strcpy(player->name, "Player");
     gf3d_get_cam()->player = player;
     player->think = player_think;
-    player->type = ent_PLAYER;
-    player->speed = 20;
+    player->type = ent_CHAR;
+    playerData->speed = 20;
     player->position.x = 5;
     player->position.y = 5;
     player->position.z = 5;
     player->touch = entity_touch;
-    player->collider_radius = 10;
-    player->check_for_raycast = 1;
+    playerData->collider_radius = 10;
+    playerData->check_for_raycast = 1;
     gameManager()->player = player;
 
     // Create ent
     Entity* dino = entity_new();
+    dino->data = malloc(sizeof(Character));
+    Character* sinoData = (Character*)dino->data;
+    dino->type = ent_CHAR;
     strcpy(dino->name, "Dino");
     dino->model = dinoModel;
     dino->position.y = 6;
     dino->position.z = 6;
     dino->position.x = 0;
     //dino->think = dino_think;
-    dino->collider_radius = 10;
+
+    sinoData->collider_radius = 10;
+    sinoData->check_for_raycast = 0;
     dino->modelRotOffset = vector3d(GFC_HALF_PI,-GFC_HALF_PI,0);
 
     //// Create ent
@@ -94,10 +101,16 @@ int main(int argc,char *argv[])
 
     
     // Create FLOOR
+    //gameManager()->level = &level;
+    //gameManager()->level->model = gf3d_model_load("floor");
+    //gameManager()->level->modelRotOffset = vector3d(GFC_HALF_PI, 0, 0);
     Entity* floor = entity_new();
+    floor->type = ent_LEVEL;
     strcpy(floor->name, "Floor");
     floor->model = gf3d_model_load("floor");
     floor->modelRotOffset = vector3d(GFC_HALF_PI, 0, 0);
+
+
     //floor->think = floor_rotate;
 
     // main game loop
@@ -114,7 +127,7 @@ int main(int argc,char *argv[])
         //update game things here
         //slog("deltaTime: %f", gameManager()->deltaTime);
         // Get mouse input delta
-        player->rotation.x += (gameManager()->my - half_h) * 0.001;// V look (pitch)
+        player->rotation.x -= (gameManager()->my - half_h) * 0.001;// V look (pitch)
         player->rotation.y += (gameManager()->mx - half_w) * 0.001;// H look (yaw)
 
         gf3d_get_cam()->rotation.x = player->rotation.x;
@@ -131,7 +144,7 @@ int main(int argc,char *argv[])
         gf3d_camera_FPS_rotation(
             gf3d_get_cam(),
             player->position,
-            -gf3d_get_cam()->rotation.x,
+            gf3d_get_cam()->rotation.x,
             -gf3d_get_cam()->rotation.y
         );
 
@@ -173,9 +186,9 @@ int main(int argc,char *argv[])
     slog_sync();
     return 0;
 }
-void startGame() {
-
-}
+//Level * init_level() {
+//    return &level;
+//}
 GameManager* gameManager() {
     return &game_manager;
 }

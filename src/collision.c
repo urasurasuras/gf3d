@@ -118,8 +118,19 @@ int lineCircle(Vector3D start, Vector3D end, Vector3D c, float r){
   //float len = sqrt( (distX*distX) + (distY*distY) );
 
   // get dot product of the line and circle
-  /*vector3d_dot_product*/
-  float dot = ( ((c.x-start.x)*(end.x-start.x)) + ((c.y-start.y)*(end.y-start.y)) ) / pow(len,2);
+  //float dot = vector3d_dot_product(start, end);
+  float dot = ( 
+      (
+          (c.x-start.x)*(end.x-start.x)
+          ) + 
+      (
+          (c.y-start.y)*(end.y-start.y)
+          ) + 
+      (
+          (c.z-start.z)*(end.z-start.z)
+          ) 
+      ) 
+      / pow(len,2);
 
   // find the closest point on the line
   float closestX = start.x + (dot * (end.x-start.x));

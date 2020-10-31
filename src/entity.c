@@ -1,6 +1,7 @@
 #include "simple_logger.h"
 #include "collision.h"
 #include "entity.h"
+#include "game.h"
 
 typedef struct {
 	Entity* entity_list;
@@ -56,7 +57,7 @@ Entity* entity_new() {
 			gfc_matrix_identity(entity_manager.entity_list[i].modelMatrix);// Init matrix
 			entity_manager.entity_list[i].position = vector3d(0, 0, 0);// Init pos
 			entity_manager.entity_list[i].rotation = vector3d(0, 0, 0);// Init rotation
-			entity_manager.entity_list[i].speed = 10;// Init speed
+			//entity_manager.entity_list[i].speed = 10;// Init speed
 			//// Set facing direction to rotation
 			//entity_manager.entity_list[i].facingDirection.x = cos(entity_manager.entity_list[i].rotation.x);
 			//entity_manager.entity_list[i].facingDirection.y = sin(entity_manager.entity_list[i].rotation.x);
@@ -69,7 +70,7 @@ Entity* entity_new() {
 
 void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
 	if (!self)return;
-	if (self->type == ent_PLAYER)return;
+	if (!self->model)return;
 
 	Vector3D drawPos;
 	vector3d_add(drawPos, self->position, self->modelPosOffset);
@@ -86,7 +87,7 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 }
 
 void entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
-	
+
 	for (Uint32 i = 0; i < entity_manager.entity_count; i++) {
 		if (entity_manager.entity_list[i]._inuse) {
 			entity_draw(&entity_manager.entity_list[i], bufferFrame, commandBuffer);
@@ -97,7 +98,8 @@ void entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
 void entity_think_all(float deltaTime) {
 	
 	for (Uint32 i = 0; i < entity_manager.entity_count; i++) {
-		if (entity_manager.entity_list[i]._inuse && entity_manager.entity_list[i].think) {
+		if (!entity_manager.entity_list[i]._inuse)continue;
+		if (entity_manager.entity_list[i].think) {
 			entity_manager.entity_list[i].think(&entity_manager.entity_list[i], deltaTime);
 		}
 		if (entity_manager.entity_list[i].touch) {
@@ -107,13 +109,50 @@ void entity_think_all(float deltaTime) {
 }
 
 void entity_entity_collide(Entity* e1, Entity* e2) {
-	if (collide_sphere(e1->position, e1->collider_radius, e2->position, e2->collider_radius))
-	{// Sphere-to-sphere
-		if (e1->touch)
-		{
-			e1->touch(e1, e2);
+	Character* thisChar;
+	Character* otherChar;
+	Level* thisLevel;
+	switch (e1->type)
+	{
+	case ent_LEVEL:
+
+		thisLevel = (Level*)e1->data;
+		if (!thisLevel) {
+			slog("This ent is not a leve!");
+			break;
 		}
+
+		slog("This ent is a level");
+
+
+		break;
+	case ent_CHAR:
+
+		thisChar = (Character*)e1->data;
+		otherChar = (Character*)e2->data;
+		if (!thisChar) {
+			//slog("%s is not a character!", e1->name);
+			break;
+		}
+		if (!otherChar) {
+			//slog("%s is not a character!", e2->name);
+			break;
+		}
+
+		else if (collide_sphere(e1->position, thisChar->collider_radius, e2->position, otherChar->collider_radius))
+		{// Sphere-to-sphere
+			if (e1->touch)
+			{
+				e1->touch(e1, e2);
+			}
+		}
+
+		break;
+	default:
+		slog("This entity has no type!");
+		break;
 	}
+
 }
 void entity_collision_check(Entity* entity)
 {
@@ -121,25 +160,49 @@ void entity_collision_check(Entity* entity)
 	if (!entity)return;
 	for (i = 0; i < entity_manager.entity_count; i++)
 	{
-
 		if (!entity_manager.entity_list[i]._inuse)continue;
 		if (&entity_manager.entity_list[i] == entity)continue;
 
-		entity_entity_collide(entity, &entity_manager.entity_list[i]);
+		Entity* other = &entity_manager.entity_list[i];
 
-		if (entity->check_for_raycast) {
-			Vector3D rayEnd;
-			vector3d_scale(rayEnd, entity->facingDirection, 10);
-			int yes = lineCircle(
-				entity->position,
-				rayEnd,
-				entity_manager.entity_list[i].position,
-				entity_manager.entity_list[i].collider_radius
-			);
-			if (yes) {
-				slog("%s casting a ray on %s", entity->name, entity_manager.entity_list[i].name);
+		entity_entity_collide(entity, other);
+
+		Character* character = (Character*)entity->data;
+		Character* otherChar = (Character*)other->data;
+
+		if (!otherChar)continue;
+
+		if (character) {
+			if (character->check_for_raycast) {
+				Vector3D rayScale;
+				Vector3D rayEnd;
+
+				vector3d_scale(rayScale, character->facingDirection, 1000);
+				vector3d_add(rayEnd, entity->position, rayScale);
+				slog("Ray end:");
+				vector3d_slog(entity->position);
+				
+
+
+				if (pointSphere(rayEnd, other->position, otherChar->collider_radius)) {
+					//slog("End of ray touching dino");
+				}
+
+
+
+
+				vector3d_slog(rayEnd);
+				int yes = lineCircle(
+					entity->position,
+					rayEnd,
+					other->position,
+					otherChar->collider_radius
+				);
+				if (yes) {
+					slog("%s casting a ray on %s", entity->name, other->name);
+				}
+
 			}
-
 		}
 	}
 }
