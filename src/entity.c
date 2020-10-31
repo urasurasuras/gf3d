@@ -1,4 +1,5 @@
 #include "simple_logger.h"
+#include "collision.h"
 #include "entity.h"
 
 typedef struct {
@@ -17,13 +18,13 @@ void entity_free(Entity* self) {
 }
 void entity_free_all(){
 	
-	for (int i = 0; i < entity_manager.entity_count; i++) {
+	for (Uint32 i = 0; i < entity_manager.entity_count; i++) {
 		if (entity_manager.entity_list[i]._inuse) {
 			entity_free(&entity_manager.entity_list[i]);
 		}
 	}
 }
-EntityManager entity_manager_close() {
+void entity_manager_close() {
 	entity_free_all();
 	entity_manager.entity_count = 0;
 	free(entity_manager.entity_list);
@@ -47,7 +48,7 @@ void entity_init(Uint32 max) {
 }
 Entity* entity_new() {
 	
-	for (int i = 0; i < entity_manager.entity_count; i++) {
+	for (Uint32 i = 0; i < entity_manager.entity_count; i++) {
 		if (!entity_manager.entity_list[i]._inuse) {
 			// Mark _inuse
 			entity_manager.entity_list[i]._inuse = 1;
@@ -56,12 +57,14 @@ Entity* entity_new() {
 			entity_manager.entity_list[i].position = vector3d(0, 0, 0);// Init pos
 			entity_manager.entity_list[i].rotation = vector3d(0, 0, 0);// Init rotation
 			entity_manager.entity_list[i].speed = 10;// Init speed
-			// Set facing direction to rotation
-			entity_manager.entity_list[i].facingDirection.x = cos(entity_manager.entity_list[i].rotation.x);
-			entity_manager.entity_list[i].facingDirection.y = sin(entity_manager.entity_list[i].rotation.x);
+			//// Set facing direction to rotation
+			//entity_manager.entity_list[i].facingDirection.x = cos(entity_manager.entity_list[i].rotation.x);
+			//entity_manager.entity_list[i].facingDirection.y = sin(entity_manager.entity_list[i].rotation.x);
 			return &entity_manager.entity_list[i];
 		}
 	}
+	slog("No new entity slots!");
+	return NULL;
 }
 
 void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
@@ -71,7 +74,7 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 	Vector3D drawPos;
 	vector3d_add(drawPos, self->position, self->modelPosOffset);
 	gfc_matrix_make_translation(
-		&self->modelMatrix,
+		self->modelMatrix,
 		drawPos
 	);
 
@@ -84,7 +87,7 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 
 void entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
 	
-	for (int i = 0; i < entity_manager.entity_count; i++) {
+	for (Uint32 i = 0; i < entity_manager.entity_count; i++) {
 		if (entity_manager.entity_list[i]._inuse) {
 			entity_draw(&entity_manager.entity_list[i], bufferFrame, commandBuffer);
 		}
@@ -93,10 +96,36 @@ void entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
 
 void entity_think_all(float deltaTime) {
 	
-	for (int i = 0; i < entity_manager.entity_count; i++) {
+	for (Uint32 i = 0; i < entity_manager.entity_count; i++) {
 		if (entity_manager.entity_list[i]._inuse && entity_manager.entity_list[i].think) {
 			entity_manager.entity_list[i].think(&entity_manager.entity_list[i], deltaTime);
 		}
+		if (entity_manager.entity_list[i].touch) {
+			entity_collision_check(&entity_manager.entity_list[i]);
+		}
+	}
+}
+
+void entity_entity_collide(Entity* e1, Entity* e2) {
+	if (collide_sphere(e1->position, e1->collider_radius, e2->position, e2->collider_radius))
+	{// Sphere-to-sphere
+		if (e1->touch)
+		{
+			e1->touch(e1, e2);
+		}
+	}
+}
+void entity_collision_check(Entity* entity)
+{
+	int i;
+	if (!entity)return;
+	for (i = 0; i < entity_manager.entity_count; i++)
+	{
+
+		if (!entity_manager.entity_list[i]._inuse)continue;
+		if (&entity_manager.entity_list[i] == entity)continue;
+
+		entity_entity_collide(entity, &entity_manager.entity_list[i]);
 	}
 }
 EntityManager *get_entity_manager(){

@@ -59,6 +59,7 @@ int main(int argc,char *argv[])
 
     // Create PLAYER
     Entity* player = entity_new();
+    strcpy(player->name, "Player");
     gf3d_get_cam()->player = player;
     player->think = player_think;
     player->type = ent_PLAYER;
@@ -66,15 +67,19 @@ int main(int argc,char *argv[])
     player->position.x = 5;
     player->position.y = 5;
     player->position.z = 5;
+    player->touch = entity_touch;
+    player->collider_radius = 10;
     gameManager()->player = player;
 
     // Create ent
     Entity* dino = entity_new();
+    strcpy(dino->name, "Dino");
     dino->model = dinoModel;
     dino->position.y = 6;
     dino->position.z = 6;
     dino->position.x = 0;
     dino->think = dino_think;
+    dino->collider_radius = 10;
     dino->modelRotOffset = vector3d(GFC_HALF_PI,-GFC_HALF_PI,0);
 
     //// Create ent
@@ -89,6 +94,7 @@ int main(int argc,char *argv[])
     
     // Create FLOOR
     Entity* floor = entity_new();
+    strcpy(floor->name, "Floor");
     floor->model = gf3d_model_load("floor");
     floor->modelRotOffset = vector3d(GFC_HALF_PI, 0, 0);
     //floor->think = floor_rotate;
@@ -137,6 +143,7 @@ int main(int argc,char *argv[])
 
         if (play) {
             entity_think_all(gameManager()->deltaTime);
+            slog("Update");
         }
 
         SDL_WarpMouseInWindow(NULL, half_w, half_h);

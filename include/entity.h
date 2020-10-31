@@ -11,6 +11,7 @@
 typedef struct Entity_S {
 	Uint8 _inuse;
 	Uint8 type;
+	TextWord name;
 
 	// Model
 	Model* model;
@@ -25,11 +26,16 @@ typedef struct Entity_S {
 	Vector3D velocity;	// Moving direction
 	float speed;		// Speed multiplier
 
+	Uint32 collider_radius; // Radius of collider sphere
+
+	// Update
 	void (*think)(struct Entity_S* self, float deltaTime);
+	void (*touch)(struct Entity_S* self, struct Entity_S * other);
 }Entity;
 
 void entity_init(Uint32 max);
 Entity* entity_new();
 void entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer);
 void entity_think_all(float deltaTime);
+void entity_collision_check(Entity* entity);
 #endif // !_ENTITY_H_
