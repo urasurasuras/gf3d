@@ -26,8 +26,8 @@ int collide_menu(SDL_Rect r1, Vector2D m);
 
 int pointCircle(Vector2D p, Vector2D c, float r);
 
-int linePoint(Vector2D start, Vector2D end, Vector2D p);
+int linePoint(Vector3D start, Vector3D end, Vector3D p);
 
-int lineCircle(Vector2D start, Vector2D end, Vector2D c, float r);
+int lineCircle(Vector3D start, Vector3D end, Vector3D c, float r);
 
 #endif

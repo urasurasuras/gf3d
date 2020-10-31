@@ -27,6 +27,7 @@ typedef struct Entity_S {
 	float speed;		// Speed multiplier
 
 	Uint32 collider_radius; // Radius of collider sphere
+	Uint32 check_for_raycast;
 
 	// Update
 	void (*think)(struct Entity_S* self, float deltaTime);

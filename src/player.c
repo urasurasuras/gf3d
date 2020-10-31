@@ -36,12 +36,12 @@ void player_think(Entity* self, float deltaTime) {
 		self->velocity.x -= axisR.x;
 		self->velocity.z -= axisR.z;
 	}
-	//self->position.y += 0.01;
-	//self->position.x += 0.01;
+	vector3d_slog(self->facingDirection);
 
 	entity_move(self, deltaTime);
 }
 
+void entity_raycast();
 void entity_move(Entity * self) {
 
 
@@ -86,5 +86,5 @@ void dino_think(Entity * self, float deltaTime) {
 }
 
 void entity_touch(Entity * self, Entity * other) {
-	slog("%s colliding with %s", self->name, other->name);
+	//slog("%s colliding with %s", self->name, other->name);
 }

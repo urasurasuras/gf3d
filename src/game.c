@@ -69,6 +69,7 @@ int main(int argc,char *argv[])
     player->position.z = 5;
     player->touch = entity_touch;
     player->collider_radius = 10;
+    player->check_for_raycast = 1;
     gameManager()->player = player;
 
     // Create ent
@@ -78,7 +79,7 @@ int main(int argc,char *argv[])
     dino->position.y = 6;
     dino->position.z = 6;
     dino->position.x = 0;
-    dino->think = dino_think;
+    //dino->think = dino_think;
     dino->collider_radius = 10;
     dino->modelRotOffset = vector3d(GFC_HALF_PI,-GFC_HALF_PI,0);
 

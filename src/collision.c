@@ -61,16 +61,31 @@ int pointCircle(Vector2D p, Vector2D c, float r) {
   }
   return false;
 }
+// POINT/sphere
+int pointSphere(Vector3D p, Vector3D c, float r) {
+
+  // get distance between the point and circle's center
+  // using the Pythagorean Theorem
+    Vector3D diff;
+    vector3d_sub(diff, p, c);
+
+  // if the distance is less than the circle's
+  // radius the point is inside!
+  if (vector3d_magnitude_squared(diff) <= r*r) {
+    return true;
+  }
+  return false;
+}
 
 // LINE/POINT
-int linePoint(Vector2D start, Vector2D end, Vector2D p){
+int linePoint(Vector3D start, Vector3D end, Vector3D p){
 
   // get distance from the point to the two ends of the line
-  float d1 = vector2d_magnitude_between(p, start);
-  float d2 = vector2d_magnitude_between(p, end);
+  float d1 = vector3d_magnitude_between(p, start);
+  float d2 = vector3d_magnitude_between(p, end);
 
   // get the length of the line
-  float lineLen = vector2d_magnitude_between(start, end);
+  float lineLen = vector3d_magnitude_between(start, end);
 
   // since floats are so minutely accurate, add
   // a little buffer zone that will give collision
@@ -88,29 +103,32 @@ int linePoint(Vector2D start, Vector2D end, Vector2D p){
 
 
 // LINE/CIRCLE
-int lineCircle(Vector2D start, Vector2D end, Vector2D c, float r){
+int lineCircle(Vector3D start, Vector3D end, Vector3D c, float r){
 
   // is either end INSIDE the circle?
   // if so, return true immediately
-  int inside1 = pointCircle(start, c, r);
-  int inside2 = pointCircle(end, c, r);
+  int inside1 = pointSphere(start, c, r);
+  int inside2 = pointSphere(end, c, r);
   if (inside1 || inside2) return true;
 
   // get length of the line
-  float distX = start.x - end.x;
-  float distY = start.y - end.y;
-  float len = sqrt( (distX*distX) + (distY*distY) );
+  float len = vector3d_magnitude_between(start, end);
+  //float distX = start.x - end.x;
+  //float distY = start.y - end.y;
+  //float len = sqrt( (distX*distX) + (distY*distY) );
 
   // get dot product of the line and circle
+  /*vector3d_dot_product*/
   float dot = ( ((c.x-start.x)*(end.x-start.x)) + ((c.y-start.y)*(end.y-start.y)) ) / pow(len,2);
 
   // find the closest point on the line
   float closestX = start.x + (dot * (end.x-start.x));
   float closestY = start.y + (dot * (end.y-start.y));
+  float closestZ = start.z + (dot * (end.z-start.z));
 
   // is this point actually on the line segment?
   // if so keep going, but if not, return false
-  int onSegment = linePoint(start,end, vector2d(closestX,closestY));
+  int onSegment = linePoint(start,end, vector3d(closestX,closestY,closestZ));
   if (!onSegment) return false;
 
   // optionally, draw a circle at the closest
@@ -120,9 +138,10 @@ int lineCircle(Vector2D start, Vector2D end, Vector2D c, float r){
 //   ellipse(closestX, closestY, 20, 20);
 
   // get distance to closest point
-  distX = closestX - c.x;
-  distY = closestY - c.y;
-  float distance = sqrt( (distX*distX) + (distY*distY) );
+    float distX = closestX - c.x;
+    float distY = closestY - c.y;
+    float distZ = closestZ - c.z;
+    float distance = sqrt( (distX*distX) + (distY*distY) + (distZ*distZ));
 
   if (distance <= r) {
     return true;

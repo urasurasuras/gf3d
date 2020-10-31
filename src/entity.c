@@ -126,8 +126,24 @@ void entity_collision_check(Entity* entity)
 		if (&entity_manager.entity_list[i] == entity)continue;
 
 		entity_entity_collide(entity, &entity_manager.entity_list[i]);
+
+		if (entity->check_for_raycast) {
+			Vector3D rayEnd;
+			vector3d_scale(rayEnd, entity->facingDirection, 10);
+			int yes = lineCircle(
+				entity->position,
+				rayEnd,
+				entity_manager.entity_list[i].position,
+				entity_manager.entity_list[i].collider_radius
+			);
+			if (yes) {
+				slog("%s casting a ray on %s", entity->name, entity_manager.entity_list[i].name);
+			}
+
+		}
 	}
 }
+
 EntityManager *get_entity_manager(){
 	return &entity_manager;
 }
