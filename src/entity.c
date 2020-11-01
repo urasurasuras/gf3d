@@ -128,28 +128,61 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 		break;
 	case ent_CHAR:
 
-		thisChar = (Character*)e1->data;
-		otherChar = (Character*)e2->data;
-		if (!thisChar) {
-			//slog("%s is not a character!", e1->name);
+		switch (e2->type)
+		{
+		case ent_LEVEL:
 			break;
-		}
-		if (!otherChar) {
-			//slog("%s is not a character!", e2->name);
-			break;
-		}
+		case ent_CHAR:
 
-		else if (collide_sphere(e1->position, thisChar->collider_radius, e2->position, otherChar->collider_radius))
-		{// Sphere-to-sphere
-			if (e1->touch)
-			{
-				e1->touch(e1, e2);
+			thisChar = (Character*)e1->data;
+			otherChar = (Character*)e2->data;
+
+
+			if (!thisChar) {
+				slog("%s is not a character! (has null data pointer)", e1->name);
+				break;
 			}
+			if (!otherChar) {
+				slog("%s is not a character! (has null data pointer)", e2->name);
+				break;
+			}
+
+			// if this ent is in circle collision with the other ent
+			if (collide_sphere(e1->position, thisChar->collider_radius, e2->position, otherChar->collider_radius))
+			{// Sphere-to-sphere
+				if (e1->touch)
+				{
+					e1->touch(e1, e2);
+				}
+			}
+
+			if (thisChar->check_for_raycast) {// If this entity is meant to raycast
+				Vector3D rayScale;
+				Vector3D rayEnd;
+
+				vector3d_scale(rayScale, thisChar->facingDirection, 1000);//TODO: not hardcode
+				vector3d_add(rayEnd, e1->position, rayScale);
+
+				//vector3d_slog(rayEnd);
+				int yes = lineCircle(
+					e1->position,
+					rayEnd,
+					e2->position,
+					otherChar->collider_radius
+				);
+				if (yes) {
+					slog("%s casting a ray on %s", e1->name, e2->name);
+				}
+			}			
+			break;
+		default:
+			slog("Other ent %s has no type", e2->name);
+			break;
 		}
 
 		break;
 	default:
-		slog("This entity has no type!");
+		slog("This entity %s has no type!", e1->name);
 		break;
 	}
 
@@ -166,44 +199,7 @@ void entity_collision_check(Entity* entity)
 		Entity* other = &entity_manager.entity_list[i];
 
 		entity_entity_collide(entity, other);
-
-		Character* character = (Character*)entity->data;
-		Character* otherChar = (Character*)other->data;
-
-		if (!otherChar)continue;
-
-		if (character) {
-			if (character->check_for_raycast) {
-				Vector3D rayScale;
-				Vector3D rayEnd;
-
-				vector3d_scale(rayScale, character->facingDirection, 1000);
-				vector3d_add(rayEnd, entity->position, rayScale);
-				slog("Ray end:");
-				vector3d_slog(entity->position);
-				
-
-
-				if (pointSphere(rayEnd, other->position, otherChar->collider_radius)) {
-					//slog("End of ray touching dino");
-				}
-
-
-
-
-				vector3d_slog(rayEnd);
-				int yes = lineCircle(
-					entity->position,
-					rayEnd,
-					other->position,
-					otherChar->collider_radius
-				);
-				if (yes) {
-					slog("%s casting a ray on %s", entity->name, other->name);
-				}
-
-			}
-		}
+		
 	}
 }
 

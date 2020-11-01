@@ -24,8 +24,7 @@ typedef struct Entity_S {
 	// Physics
 	Vector3D position;	// Position in 3D space
 	Vector3D rotation;	// Euler rotation in radians
-
-
+	float gravity;	// Gravity scale
 
 	// Update
 	void (*think)(struct Entity_S* self, float deltaTime);
@@ -36,13 +35,26 @@ void entity_init(Uint32 max);
 Entity* entity_new();
 void entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer);
 void entity_think_all(float deltaTime);
+/**
+* @brief Check all other entites for collision
+* @param entity Self
+*/
 void entity_collision_check(Entity* entity);
 
 /**
  Types of different entities
 */
+typedef struct RectPrism_S {
+	float x;
+	float y;
+	float z;
+	float w;// Width
+	float h;// Height
+	float d;// Depth
+}RectPrism;
+
 typedef struct Level_S {
-	SDL_Rect bounds;
+	RectPrism bounds;
 }Level;
 
 typedef struct Character_S {

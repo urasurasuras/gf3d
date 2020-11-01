@@ -105,10 +105,18 @@ int main(int argc,char *argv[])
     //gameManager()->level->model = gf3d_model_load("floor");
     //gameManager()->level->modelRotOffset = vector3d(GFC_HALF_PI, 0, 0);
     Entity* floor = entity_new();
+    floor->data = malloc(sizeof(Level));
+    Level* floorData = (Level*)floor->data;
     floor->type = ent_LEVEL;
     strcpy(floor->name, "Floor");
     floor->model = gf3d_model_load("floor");
     floor->modelRotOffset = vector3d(GFC_HALF_PI, 0, 0);
+    floorData->bounds.x = -160;
+    floorData->bounds.y = 0;
+    floorData->bounds.z = -160;
+    floorData->bounds.w = 160;
+    floorData->bounds.h = 160;
+    floorData->bounds.d = 160;
 
 
     //floor->think = floor_rotate;
