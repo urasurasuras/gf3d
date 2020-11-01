@@ -133,12 +133,12 @@ int main(int argc,char *argv[])
         gf3d_get_cam()->rotation.x = player->rotation.x;
         gf3d_get_cam()->rotation.y = player->rotation.y;
 
-        // Lock rotation
-        if (player->rotation.x > GFC_HALF_PI) {
-            player->rotation.x = GFC_HALF_PI;
+        // Clamp rotation
+        if (player->rotation.x > 1.5) {
+            player->rotation.x = 1.5;
         }
-        else if (player->rotation.x < -GFC_HALF_PI) {
-            player->rotation.x = -GFC_HALF_PI;
+        else if (player->rotation.x < -1.5) {
+            player->rotation.x = -1.5;
         }
 
         gf3d_camera_FPS_rotation(
