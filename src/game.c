@@ -82,11 +82,11 @@ int main(int argc,char *argv[])
     strcpy(dino->name, "Dino");
     dino->model = dinoModel;
     dino->position.y = 6;
-    dino->position.z = 6;
+    dino->position.z = 30;
     dino->position.x = 0;
     //dino->think = dino_think;
 
-    sinoData->collider_radius = 10;
+    sinoData->collider_radius = 6;
     sinoData->check_for_raycast = 0;
     dino->modelRotOffset = vector3d(GFC_HALF_PI,-GFC_HALF_PI,0);
 

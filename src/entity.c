@@ -99,12 +99,12 @@ void entity_think_all(float deltaTime) {
 	
 	for (Uint32 i = 0; i < entity_manager.entity_count; i++) {
 		if (!entity_manager.entity_list[i]._inuse)continue;
+		TextWord name;
+		strcpy(name, entity_manager.entity_list[i].name);
 		if (entity_manager.entity_list[i].think) {
 			entity_manager.entity_list[i].think(&entity_manager.entity_list[i], deltaTime);
 		}
-		if (entity_manager.entity_list[i].touch) {
-			entity_collision_check(&entity_manager.entity_list[i]);
-		}
+		entity_collision_check(&entity_manager.entity_list[i]);
 	}
 }
 
@@ -125,10 +125,8 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			slog("This ent is not a leve!");
 			break;
 		}
-
-		slog("This ent is a level");
-
-
+		// Level does not need to do anything if it collides with something else
+		// Every entity is responsible for their own collision behavior
 		break;
 	case ent_CHAR:
 
@@ -140,6 +138,9 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			otherLevel = (Level*)e2->data;
 			levelRect = otherLevel->bounds;
 
+			if (e1->position.y - thisChar->collider_radius < levelRect.y) {
+				e1->position.y = levelRect.y + thisChar->collider_radius;
+			}
 			//slog("%s at %.2f,%.2f,%.2f", e1->name, e1->position.x, e1->position.y, e1->position.z);
 
 			if (e1->position.x - thisChar->collider_radius < levelRect.x) {
@@ -174,6 +175,31 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			// if this ent is in circle collision with the other ent
 			if (collide_sphere(e1->position, thisChar->collider_radius, e2->position, otherChar->collider_radius))
 			{// Sphere-to-sphere
+
+				float diffX = e1->position.x - e2->position.x;
+				float diffY = e1->position.y - e2->position.y;
+				float diffZ = e1->position.z - e2->position.z;
+				float radii_sum = thisChar->collider_radius + otherChar->collider_radius;
+				float length = vector3d_magnitude(vector3d(diffX, diffY, diffZ));
+				float unitX = diffX / length;
+				float unitY = diffY / length;
+				float unitZ = diffZ / length;
+
+				slog("Diff: %.2f,%.2f,%.2f", diffX, diffY, diffZ);
+
+				e1->position.x = e2->position.x + (radii_sum) * unitX;
+				e1->position.y = e2->position.y + (radii_sum) * unitY;
+				e1->position.z = e2->position.z + (radii_sum) * unitZ;
+				//if (e1->position.x < e2->position.x)
+				//	e1->position.x = e2->position.x + diffX;
+				//else if (e1->position.x > e2->position.x)
+				//	e1->position.x = e2->position.x + diffX;
+
+				//if (e1->position.z < e2->position.z)
+				//	e1->position.z = e2->position.z + diffZ;
+				//else if (e1->position.z > e2->position.z)
+				//	e1->position.z = e2->position.z + diffZ;
+
 				if (e1->touch)
 				{
 					e1->touch(e1, e2);
