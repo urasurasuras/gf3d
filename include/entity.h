@@ -24,7 +24,6 @@ typedef struct Entity_S {
 	// Physics
 	Vector3D position;	// Position in 3D space
 	Vector3D rotation;	// Euler rotation in radians
-	float gravity;	// Gravity scale
 
 	// Update
 	void (*think)(struct Entity_S* self, float deltaTime);

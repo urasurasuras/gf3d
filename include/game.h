@@ -19,6 +19,8 @@
 
 #define window_W 1280
 #define window_H 720
+
+#define GRAVITATIONAL_ACCELERATION 8 // yea, it's 8, deal with it
 //
 //typedef struct Level_S {
 //	Model* model;

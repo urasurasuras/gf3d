@@ -138,8 +138,12 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			otherLevel = (Level*)e2->data;
 			levelRect = otherLevel->bounds;
 
+			// If ent is below ground, pull them up
 			if (e1->position.y - thisChar->collider_radius < levelRect.y) {
 				e1->position.y = levelRect.y + thisChar->collider_radius;
+			}
+			else {// Apply gravity
+				e1->position.y -= gameManager()->deltaTime * GRAVITATIONAL_ACCELERATION;
 			}
 			//slog("%s at %.2f,%.2f,%.2f", e1->name, e1->position.x, e1->position.y, e1->position.z);
 

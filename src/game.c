@@ -70,7 +70,7 @@ int main(int argc,char *argv[])
     player->position.y = 5;
     player->position.z = 5;
     player->touch = entity_touch;
-    playerData->collider_radius = 10;
+    playerData->collider_radius = 4;
     playerData->check_for_raycast = 1;
     gameManager()->player = player;
 
