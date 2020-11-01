@@ -111,7 +111,11 @@ void entity_think_all(float deltaTime) {
 void entity_entity_collide(Entity* e1, Entity* e2) {
 	Character* thisChar;
 	Character* otherChar;
+
 	Level* thisLevel;
+	Level* otherLevel;
+
+	RectPrism levelRect;
 	switch (e1->type)
 	{
 	case ent_LEVEL:
@@ -128,15 +132,35 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 		break;
 	case ent_CHAR:
 
+		thisChar = (Character*)e1->data;
+
 		switch (e2->type)
 		{
 		case ent_LEVEL:
+			otherLevel = (Level*)e2->data;
+			levelRect = otherLevel->bounds;
+
+			//slog("%s at %.2f,%.2f,%.2f", e1->name, e1->position.x, e1->position.y, e1->position.z);
+
+			if (e1->position.x - thisChar->collider_radius < levelRect.x) {
+				e1->position.x = levelRect.x + (thisChar->collider_radius); 
+			}
+			else if (e1->position.x + thisChar->collider_radius > levelRect.w) {
+				e1->position.x = levelRect.w - (thisChar->collider_radius); 
+			}
+
+			if (e1->position.z - thisChar->collider_radius < levelRect.z) {
+				e1->position.z = levelRect.z + (thisChar->collider_radius); 
+			}
+			else if (e1->position.z + thisChar->collider_radius > levelRect.d) {
+				e1->position.z = levelRect.d - (thisChar->collider_radius); 
+			}
+			
+
 			break;
 		case ent_CHAR:
 
-			thisChar = (Character*)e1->data;
 			otherChar = (Character*)e2->data;
-
 
 			if (!thisChar) {
 				slog("%s is not a character! (has null data pointer)", e1->name);

@@ -117,7 +117,8 @@ int main(int argc,char *argv[])
     floorData->bounds.w = 160;
     floorData->bounds.h = 160;
     floorData->bounds.d = 160;
-
+    floor->data = floorData;
+    gameManager()->level = floor;//FIX: level bounds not correct
 
     //floor->think = floor_rotate;
 
