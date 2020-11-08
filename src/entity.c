@@ -171,7 +171,7 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 		case ent_LEVEL:
 			otherLevel = (Level*)e2->data;
 			levelRect = otherLevel->bounds;
-			e1->position.y -= gameManager()->deltaTime * GRAVITATIONAL_ACCELERATION;
+			//e1->position.y -= gameManager()->deltaTime * GRAVITATIONAL_ACCELERATION;
 
 			// If ent is below ground, pull them up
 			if (e1->position.y - e1->rigidbody.collider_radius < levelRect.y) {
@@ -245,7 +245,7 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			break;
 
 		default:
-			slog("Other ent %s has no type", e2->name);
+			//slog("Other ent %s has no type", e2->name);
 			break;
 		}
 
@@ -263,7 +263,7 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 		break;
 
 	default:
-		slog("This entity %s has no type!", e1->name);
+		//slog("This entity %s has no type!", e1->name);
 		break;
 	}
 

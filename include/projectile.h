@@ -5,5 +5,6 @@
 #include "entity.h"
 
 Entity * projectile_spawn(Entity * owner);
+Entity* projectile_arrow_spawn(Entity* owner);
 void projectile_do_damage(Entity* self, Entity* other);
 #endif // !1

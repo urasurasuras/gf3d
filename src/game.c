@@ -160,6 +160,20 @@ int main(int argc,char *argv[])
     floor->data = floorData;
     gameManager()->level = floorData;//FIX: level bounds not correct
 
+    Entity* walls = entity_new();
+    //walls->data = malloc(sizeof(Level));
+    //Level* wallsData = (Level*)walls->data;
+    //walls->type = ent_LEVEL;
+    gfc_word_cpy(walls->name, "Walls");
+    walls->model = gf3d_model_load("walls");
+    walls->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
+    //wallsData->bounds.x = -160;
+    //wallsData->bounds.y = 0;
+    //wallsData->bounds.z = -160;
+    //wallsData->bounds.w = 160;
+    //wallsData->bounds.h = 160;
+    //wallsData->bounds.d = 160;
+    //walls->data = wallsData;
     //floor->think = floor_rotate;
 
     // main game loop

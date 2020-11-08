@@ -7,12 +7,14 @@
 #include "gfc_matrix.h"
 
 typedef enum{
+	ent_NULL,
 	ent_LEVEL,
 	ent_CHAR,
 	ent_PROJECTILE
 }EntType;
 
 typedef enum{
+	char_NULL,
 	char_PLAYER,
 	char_AI
 }CharType;

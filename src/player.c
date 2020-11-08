@@ -16,12 +16,16 @@ void player_projectile_attack(Entity* self) {
 
 	projectile_spawn(self);
 }
+void player_projectile_arrow_attack(Entity* self) {
+
+	projectile_arrow_spawn(self);
+}
 void player_think(Entity* self, float deltaTime) {	
 	Character* character = (Character*)self->data;
 
 	// Set facing direction to rotation
 	self->facingDirection.x = cos(self->rotation.y) /** cos(self->rotation.x)*/;
-	self->facingDirection.y = cos(self->rotation.y) * sin(self->rotation.x);
+	self->facingDirection.y =/* cos(self->rotation.y) **/ sin(self->rotation.x);
 	self->facingDirection.z = sin(self->rotation.y);
 	//slog("Rotation:");
 	//vector3d_slog(self->rotation);
@@ -105,6 +109,9 @@ void player_think(Entity* self, float deltaTime) {
 			swapped = 1;
 		}
 		if (keys[SDL_SCANCODE_3]) {
+			character->primaryAttack = player_projectile_arrow_attack;
+			character->CLDN2 = 1000;
+			slog("Weapon 3 selected");
 			swapped = 1;
 		}
 		if (keys[SDL_SCANCODE_4]) {
@@ -120,6 +127,8 @@ void player_think(Entity* self, float deltaTime) {
 		//slog("%d", character->last_CLDN3);
 
 	}
+
+	vector3d_slog(self->facingDirection);
 	entity_move(self);
 
 }
@@ -129,6 +138,7 @@ void entity_move(Entity * self) {
 
 	// Increment position from velocity
 	self->position.x += (self->rigidbody.velocity.x * self->rigidbody.speed * gameManager()->deltaTime);
+	self->position.y += (self->rigidbody.velocity.y * self->rigidbody.speed * gameManager()->deltaTime);
 	self->position.z += (self->rigidbody.velocity.z * self->rigidbody.speed * gameManager()->deltaTime);
 
 }
