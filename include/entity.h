@@ -6,13 +6,64 @@
 #include "gf3d_model.h"
 #include "gfc_matrix.h"
 
-#define ent_LEVEL 1
-#define ent_CHAR 2
+typedef enum{
+	ent_LEVEL,
+	ent_CHAR,
+	ent_PROJECTILE
+}EntType;
+
+typedef enum{
+	char_PLAYER,
+	char_AI
+}CharType;
+
+
+/**
+ Types of different entities
+*/
+typedef struct{
+	float x;
+	float y;
+	float z;
+	float w;// Width
+	float h;// Height
+	float d;// Depth
+}RectPrism;
+
+typedef struct{
+	RectPrism bounds;
+}Level;
+
+typedef struct{
+	CharType type;
+
+	Uint32 check_for_raycast;
+	float health;
+
+	// Cooldowns
+	int CLDN1;
+	int last_CLDN1;
+	int CLDN2;
+	int last_CLDN2;
+	int CLDN3;
+	int last_CLDN3;
+
+	float power;
+
+	void (*primaryAttack)(struct Entity_S* self);
+
+}Character;
+
+typedef struct{
+	Vector3D velocity;	// Moving direction
+	float speed;		// Speed multiplier
+	Uint32 collider_radius; // Radius of collider sphere
+}Rigidbody;
 
 typedef struct Entity_S {
 	Uint8 _inuse;
 	TextWord name;
-	Uint8 type;
+	EntType type;
 	void* data;
 
 	// Model
@@ -24,12 +75,22 @@ typedef struct Entity_S {
 	// Physics
 	Vector3D position;	// Position in 3D space
 	Vector3D rotation;	// Euler rotation in radians
+	Vector3D facingDirection;	// Facing direction vector, offset unit vector from position of ent
+
+	Rigidbody rigidbody;
 
 	// Update
 	void (*think)(struct Entity_S* self, float deltaTime);
-	void (*touch)(struct Entity_S* self, struct Entity_S * other);
+	void (*touch)(struct Entity_S* self, struct Entity_S* other);
 }Entity;
 
+typedef struct {
+	Entity* owner;
+
+	float power;
+}Projectile;
+
+void entity_free(Entity* self);
 void entity_init(Uint32 max);
 Entity* entity_new();
 void entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer);
@@ -39,47 +100,7 @@ void entity_think_all(float deltaTime);
 * @param entity Self
 */
 void entity_collision_check(Entity* entity);
+void entity_entity_collide(Entity* self, Entity* other);
 
-/**
- Types of different entities
-*/
-typedef struct RectPrism_S {
-	float x;
-	float y;
-	float z;
-	float w;// Width
-	float h;// Height
-	float d;// Depth
-}RectPrism;
-
-typedef struct Level_S {
-	RectPrism bounds;
-}Level;
-
-typedef struct Character_S {
-	Vector3D facingDirection;	// Facing direction vector, offset unit vector from position of ent
-	Vector3D velocity;	// Moving direction
-	float speed;		// Speed multiplier
-
-	Uint32 collider_radius; // Radius of collider sphere
-	Uint32 check_for_raycast;
-}Character;
-
-//typedef struct Player_S {
-//	Vector3D facingDirection;	// Facing direction vector
-//	Vector3D velocity;	// Moving direction
-//	float speed;		// Speed multiplier
-//
-//	Uint32 collider_radius; // Radius of collider sphere
-//	Uint32 check_for_raycast;
-//}Player;
-//
-//typedef struct MOB_S {
-//	Vector3D facingDirection;	// Facing direction vector
-//	Vector3D velocity;	// Moving direction
-//	float speed;		// Speed multiplier
-//
-//	Uint32 collider_radius; // Radius of collider sphere
-//	Uint32 check_for_raycast;
-//}MOB;
+void sphere_to_sphere_pushback(Entity* e1, Entity* e2);
 #endif // !_ENTITY_H_

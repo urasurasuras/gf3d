@@ -4,6 +4,12 @@
 void floor_rotate(Entity* self, float deltaTime) {
     if (keys[SDL_SCANCODE_Q]) {
         self->rotation.x += (deltaTime);
+        /*gfc_matrix_rotate(
+            self->modelMatrix,
+            self->modelMatrix,
+            deltaTime,
+            vector3d(1, 0, 0)
+        );*/
     }
     else if (keys[SDL_SCANCODE_E]) {
         self->rotation.y += (deltaTime);
@@ -11,7 +17,35 @@ void floor_rotate(Entity* self, float deltaTime) {
     else if (keys[SDL_SCANCODE_Z]) {
         self->rotation.z += (deltaTime);
     }
+} 
+
+void spawn_dino_random(Model * model) {
+    // Create ent
+    Entity* dino = entity_new();
+    if (!dino) { return; }
+    dino->data = malloc(sizeof(Character));
+    Character* sinoData = (Character*)dino->data;
+    dino->type = ent_CHAR;
+    gfc_word_cpy(dino->name, "Dino");
+    dino->model = gf3d_model_load("dino");
+    
+    
+    dino->position.y = 6;//height
+    dino->position.z = gfc_crandom()* gameManager()->level->bounds.d;
+    dino->position.x = gfc_crandom() * gameManager()->level->bounds.w;
+    //dino->think = floor_rotate;
+
+    dino->think = dino_think;
+    dino->touch = dino_touch;
+
+    dino->rigidbody.collider_radius = 6;
+    sinoData->check_for_raycast = 0;
+    dino->rigidbody.speed = 1;
+    sinoData->health = 100;
+    dino->modelRotOffset = vector3d(-GFC_HALF_PI, -GFC_HALF_PI, 0);
+    vector3d_slog(dino->position);
 }
+
 
 int main(int argc,char *argv[])
 {
@@ -24,6 +58,9 @@ int main(int argc,char *argv[])
 
     Uint32 LAST =0;
     Uint32 NOW =0;
+
+    Uint32 EnemySpawnCldn = 5000;
+    Uint32 lastEnemySpawn = 0;
 
     int half_w = window_W / 2;
     int half_h = window_H / 2;
@@ -49,47 +86,50 @@ int main(int argc,char *argv[])
 	slog_sync();
 
     entity_init(32);
+    Model* dinoModel = gf3d_model_load("dino");
 
 
     gameManager()->lastMx = 0;
     gameManager()->lastMy = 0;
     gameManager()->deltaTime = 0;
     Matrix4 camMatrix;
-    Model * dinoModel = gf3d_model_load("dino");
 
     // Create PLAYER
     Entity* player = entity_new();
     player->data = malloc(sizeof(Character));
     Character* playerData = (Character*)player->data;
-    strcpy(player->name, "Player");
+    gfc_word_cpy(player->name, "Player");
     gf3d_get_cam()->player = player;
     player->think = player_think;
+    //player->think = floor_rotate;
     player->type = ent_CHAR;
-    playerData->speed = 20;
+    player->rigidbody.speed = 20;
     player->position.x = 5;
     player->position.y = 5;
     player->position.z = 5;
     player->touch = entity_touch;
-    playerData->collider_radius = 4;
-    playerData->check_for_raycast = 1;
+    player->rigidbody.collider_radius = 4;
+    playerData->check_for_raycast = 0;
+    playerData->CLDN1 = 1000;
+    playerData->last_CLDN1 = 0;
+    playerData->CLDN2 = 100;
+    playerData->last_CLDN2 = 0;
+    playerData->CLDN3 = 2000;
+    playerData->last_CLDN3 = 0;
+
+    playerData->power = 1;
+
+    playerData->primaryAttack = player_hitscan_attack;
+
+    playerData->health = 100;
+    //player->model = gf3d_model_load("USP45");
+    playerData->type = char_PLAYER;
+    player->modelPosOffset = vector3d(0, 0, 10);
+    player->modelRotOffset = vector3d(GFC_HALF_PI, 0, GFC_HALF_PI);
+
     gameManager()->player = player;
 
-    // Create ent
-    Entity* dino = entity_new();
-    dino->data = malloc(sizeof(Character));
-    Character* sinoData = (Character*)dino->data;
-    dino->type = ent_CHAR;
-    strcpy(dino->name, "Dino");
-    dino->model = dinoModel;
-    dino->position.y = 6;
-    dino->position.z = 30;
-    dino->position.x = 0;
-    //dino->think = dino_think;
-
-    sinoData->collider_radius = 6;
-    sinoData->check_for_raycast = 0;
-    dino->modelRotOffset = vector3d(GFC_HALF_PI,-GFC_HALF_PI,0);
-
+   
     //// Create ent
     //Entity* dino2 = entity_new();
     //dino2->model = gf3d_model_load("dino");
@@ -108,9 +148,9 @@ int main(int argc,char *argv[])
     floor->data = malloc(sizeof(Level));
     Level* floorData = (Level*)floor->data;
     floor->type = ent_LEVEL;
-    strcpy(floor->name, "Floor");
+    gfc_word_cpy(floor->name, "Floor");
     floor->model = gf3d_model_load("floor");
-    floor->modelRotOffset = vector3d(GFC_HALF_PI, 0, 0);
+    floor->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
     floorData->bounds.x = -160;
     floorData->bounds.y = 0;
     floorData->bounds.z = -160;
@@ -118,7 +158,7 @@ int main(int argc,char *argv[])
     floorData->bounds.h = 160;
     floorData->bounds.d = 160;
     floor->data = floorData;
-    gameManager()->level = floor;//FIX: level bounds not correct
+    gameManager()->level = floorData;//FIX: level bounds not correct
 
     //floor->think = floor_rotate;
 
@@ -136,8 +176,8 @@ int main(int argc,char *argv[])
         //update game things here
         //slog("deltaTime: %f", gameManager()->deltaTime);
         // Get mouse input delta
-        player->rotation.x -= (gameManager()->my - half_h) * 0.001;// V look (pitch)
-        player->rotation.y += (gameManager()->mx - half_w) * 0.001;// H look (yaw)
+        player->rotation.x -= (gameManager()->my - half_h) * gameManager()->deltaTime;// V look (pitch)
+        player->rotation.y += (gameManager()->mx - half_w) * gameManager()->deltaTime;// H look (yaw)
 
         gf3d_get_cam()->rotation.x = player->rotation.x;
         gf3d_get_cam()->rotation.y = player->rotation.y;
@@ -160,13 +200,25 @@ int main(int argc,char *argv[])
 
 
         LAST = NOW;
+        NOW = SDL_GetTicks();
+
+        gameManager()->deltaTime = ((float)(NOW - LAST) / 1000);
+        /*
+
+        LAST = NOW;
         NOW = SDL_GetPerformanceCounter();
 
-        gameManager()->deltaTime = ((float)(NOW - LAST) / (float)SDL_GetPerformanceFrequency());
+        gameManager()->deltaTime = ((float)(NOW - LAST) / (float)SDL_GetPerformanceFrequency());*/
 
         if (play) {
             entity_think_all(gameManager()->deltaTime);
-            slog("Update");
+            //slog("FPS: %.0f", 1/ gameManager()->deltaTime);
+        }
+
+
+        if (lastEnemySpawn + EnemySpawnCldn < SDL_GetTicks()) {
+            lastEnemySpawn = SDL_GetTicks();
+            spawn_dino_random(dinoModel);
         }
 
         SDL_WarpMouseInWindow(NULL, half_w, half_h);
@@ -186,6 +238,7 @@ int main(int argc,char *argv[])
         gf3d_vgraphics_render_end(bufferFrame);
 
         play = 1; // start game after we are done with the first game loop
+        if (playerData->health < 0)done = 1;
         if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
     }    
     

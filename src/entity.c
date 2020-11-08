@@ -6,15 +6,12 @@
 typedef struct {
 	Entity* entity_list;
 	Uint32 entity_count;
-
 }EntityManager;
 
 static EntityManager entity_manager = { 0 };
 
 void entity_free(Entity* self) {
 	if (!self)return;
-	//slog("freed ent: %s", self->name);
-	//gf2d_sprite_free(self->sprite);
 	memset(self, 0, sizeof(Entity));
 }
 void entity_free_all(){
@@ -73,7 +70,29 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 	if (!self->model)return;
 
 	Vector3D drawPos;
+
+
+	Vector3D drawOffSet;
+	drawOffSet.x = self->facingDirection.x * self->modelPosOffset.x;
+	drawOffSet.y = self->facingDirection.y * self->modelPosOffset.y;
+	drawOffSet.z = self->facingDirection.z * self->modelPosOffset.z;
+
+	Vector3D rayEnd;
+	rayEnd = vector3d(0, 0, 0);
+
+	if (self->type == ent_CHAR) {
+		//Character* c = (Character*)self->data;
+		//if (c->type == char_PLAYER) {
+		//	Vector3D rayScale;
+
+		//	vector3d_scale(rayScale, self->facingDirection, 1);//TODO: not hardcode
+		//	vector3d_add(rayEnd, self->position, rayScale);
+
+		//}
+	}
+	vector3d_add(self->modelPosOffset, self->modelPosOffset, rayEnd);
 	vector3d_add(drawPos, self->position, self->modelPosOffset);
+
 	gfc_matrix_make_translation(
 		self->modelMatrix,
 		drawPos
@@ -81,7 +100,7 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 
 	Vector3D drawRot;
 	vector3d_add(drawRot, self->rotation, self->modelRotOffset);
-	setRotation_model(self->modelMatrix, drawRot);
+	setRotation(self->modelMatrix, drawRot);
 
 	gf3d_model_draw(self->model, bufferFrame, commandBuffer, self->modelMatrix);
 }
@@ -125,6 +144,21 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			slog("This ent is not a leve!");
 			break;
 		}
+		levelRect = thisLevel->bounds;
+		switch (e2->type)
+		{
+		case ent_PROJECTILE:
+			if (e2->position.x - e2->rigidbody.collider_radius < levelRect.x ||
+				e2->position.x + e2->rigidbody.collider_radius > levelRect.w ||
+				e2->position.z - e2->rigidbody.collider_radius < levelRect.z ||
+				e2->position.z + e2->rigidbody.collider_radius > levelRect.d
+				) {
+				entity_free(e2);
+			}
+			break;
+		default:
+			break;
+		}
 		// Level does not need to do anything if it collides with something else
 		// Every entity is responsible for their own collision behavior
 		break;
@@ -137,28 +171,28 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 		case ent_LEVEL:
 			otherLevel = (Level*)e2->data;
 			levelRect = otherLevel->bounds;
+			e1->position.y -= gameManager()->deltaTime * GRAVITATIONAL_ACCELERATION;
 
 			// If ent is below ground, pull them up
-			if (e1->position.y - thisChar->collider_radius < levelRect.y) {
-				e1->position.y = levelRect.y + thisChar->collider_radius;
+			if (e1->position.y - e1->rigidbody.collider_radius < levelRect.y) {
+				e1->position.y = levelRect.y + e1->rigidbody.collider_radius;
 			}
 			else {// Apply gravity
-				e1->position.y -= gameManager()->deltaTime * GRAVITATIONAL_ACCELERATION;
 			}
 			//slog("%s at %.2f,%.2f,%.2f", e1->name, e1->position.x, e1->position.y, e1->position.z);
 
-			if (e1->position.x - thisChar->collider_radius < levelRect.x) {
-				e1->position.x = levelRect.x + (thisChar->collider_radius); 
+			if (e1->position.x - e1->rigidbody.collider_radius < levelRect.x) {
+				e1->position.x = levelRect.x + (e1->rigidbody.collider_radius);
 			}
-			else if (e1->position.x + thisChar->collider_radius > levelRect.w) {
-				e1->position.x = levelRect.w - (thisChar->collider_radius); 
+			else if (e1->position.x + e1->rigidbody.collider_radius > levelRect.w) {
+				e1->position.x = levelRect.w - (e1->rigidbody.collider_radius);
 			}
 
-			if (e1->position.z - thisChar->collider_radius < levelRect.z) {
-				e1->position.z = levelRect.z + (thisChar->collider_radius); 
+			if (e1->position.z - e1->rigidbody.collider_radius < levelRect.z) {
+				e1->position.z = levelRect.z + (e1->rigidbody.collider_radius);
 			}
-			else if (e1->position.z + thisChar->collider_radius > levelRect.d) {
-				e1->position.z = levelRect.d - (thisChar->collider_radius); 
+			else if (e1->position.z + e1->rigidbody.collider_radius > levelRect.d) {
+				e1->position.z = levelRect.d - (e1->rigidbody.collider_radius);
 			}
 			
 
@@ -177,32 +211,9 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			}
 
 			// if this ent is in circle collision with the other ent
-			if (collide_sphere(e1->position, thisChar->collider_radius, e2->position, otherChar->collider_radius))
+			if (collide_sphere(e1->position, e1->rigidbody.collider_radius, e2->position, e2->rigidbody.collider_radius))
 			{// Sphere-to-sphere
-
-				float diffX = e1->position.x - e2->position.x;
-				float diffY = e1->position.y - e2->position.y;
-				float diffZ = e1->position.z - e2->position.z;
-				float radii_sum = thisChar->collider_radius + otherChar->collider_radius;
-				float length = vector3d_magnitude(vector3d(diffX, diffY, diffZ));
-				float unitX = diffX / length;
-				float unitY = diffY / length;
-				float unitZ = diffZ / length;
-
-				slog("Diff: %.2f,%.2f,%.2f", diffX, diffY, diffZ);
-
-				e1->position.x = e2->position.x + (radii_sum) * unitX;
-				e1->position.y = e2->position.y + (radii_sum) * unitY;
-				e1->position.z = e2->position.z + (radii_sum) * unitZ;
-				//if (e1->position.x < e2->position.x)
-				//	e1->position.x = e2->position.x + diffX;
-				//else if (e1->position.x > e2->position.x)
-				//	e1->position.x = e2->position.x + diffX;
-
-				//if (e1->position.z < e2->position.z)
-				//	e1->position.z = e2->position.z + diffZ;
-				//else if (e1->position.z > e2->position.z)
-				//	e1->position.z = e2->position.z + diffZ;
+				sphere_to_sphere_pushback(e1, e2);
 
 				if (e1->touch)
 				{
@@ -214,7 +225,7 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 				Vector3D rayScale;
 				Vector3D rayEnd;
 
-				vector3d_scale(rayScale, thisChar->facingDirection, 1000);//TODO: not hardcode
+				vector3d_scale(rayScale, e1->facingDirection, 1000);//TODO: not hardcode
 				vector3d_add(rayEnd, e1->position, rayScale);
 
 				//vector3d_slog(rayEnd);
@@ -222,19 +233,35 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 					e1->position,
 					rayEnd,
 					e2->position,
-					otherChar->collider_radius
+					e2->rigidbody.collider_radius
 				);
 				if (yes) {
 					slog("%s casting a ray on %s", e1->name, e2->name);
+					otherChar->health -= 30;
 				}
 			}			
 			break;
+		case ent_PROJECTILE:
+			break;
+
 		default:
 			slog("Other ent %s has no type", e2->name);
 			break;
 		}
 
+	case ent_PROJECTILE:
+
+		// if this ent is in circle collision with the other ent
+		if (collide_sphere(e1->position, e1->rigidbody.collider_radius, e2->position, e2->rigidbody.collider_radius))
+		{// Sphere-to-sphere
+
+			if (e1->touch)
+			{
+				e1->touch(e1, e2);
+			}
+		}
 		break;
+
 	default:
 		slog("This entity %s has no type!", e1->name);
 		break;
@@ -245,6 +272,7 @@ void entity_collision_check(Entity* entity)
 {
 	int i;
 	if (!entity)return;
+	if (!entity->_inuse)return;
 	for (i = 0; i < entity_manager.entity_count; i++)
 	{
 		if (!entity_manager.entity_list[i]._inuse)continue;
@@ -255,6 +283,24 @@ void entity_collision_check(Entity* entity)
 		entity_entity_collide(entity, other);
 		
 	}
+}
+
+void sphere_to_sphere_pushback(Entity * e1,Entity * e2 ) {
+
+	float diffX = e1->position.x - e2->position.x;
+	float diffY = e1->position.y - e2->position.y;
+	float diffZ = e1->position.z - e2->position.z;
+	float radii_sum = e1->rigidbody.collider_radius + e2->rigidbody.collider_radius;
+	float length = vector3d_magnitude(vector3d(diffX, diffY, diffZ));
+	float unitX = diffX / length;
+	float unitY = diffY / length;
+	float unitZ = diffZ / length;
+
+	//slog("Diff: %.2f,%.2f,%.2f", diffX, diffY, diffZ);
+
+	e1->position.x = e2->position.x + (radii_sum)*unitX;
+	e1->position.y = e2->position.y + (radii_sum)*unitY;
+	e1->position.z = e2->position.z + (radii_sum)*unitZ;
 }
 
 EntityManager *get_entity_manager(){
