@@ -109,6 +109,7 @@ int main(int argc,char *argv[])
     player->position.z = 5;
     player->touch = entity_touch;
     player->rigidbody.collider_radius = 4;
+    player->rigidbody.gravity_scale = .5;
     playerData->check_for_raycast = 0;
     playerData->CLDN1 = 1000;
     playerData->last_CLDN1 = 0;
@@ -130,20 +131,7 @@ int main(int argc,char *argv[])
     gameManager()->player = player;
 
    
-    //// Create ent
-    //Entity* dino2 = entity_new();
-    //dino2->model = gf3d_model_load("dino");
-    //dino2->position.y = 20;
-    //dino2->position.z = 6;
-    //dino2->position.x = 0;
-    //dino2->think = dino_think;
-    //dino2->modelRotOffset = vector3d(0, -GFC_HALF_PI, 0);
-
-    
     // Create FLOOR
-    //gameManager()->level = &level;
-    //gameManager()->level->model = gf3d_model_load("floor");
-    //gameManager()->level->modelRotOffset = vector3d(GFC_HALF_PI, 0, 0);
     Entity* floor = entity_new();
     floor->data = malloc(sizeof(Level));
     Level* floorData = (Level*)floor->data;
@@ -161,20 +149,9 @@ int main(int argc,char *argv[])
     gameManager()->level = floorData;//FIX: level bounds not correct
 
     Entity* walls = entity_new();
-    //walls->data = malloc(sizeof(Level));
-    //Level* wallsData = (Level*)walls->data;
-    //walls->type = ent_LEVEL;
     gfc_word_cpy(walls->name, "Walls");
     walls->model = gf3d_model_load("walls");
     walls->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
-    //wallsData->bounds.x = -160;
-    //wallsData->bounds.y = 0;
-    //wallsData->bounds.z = -160;
-    //wallsData->bounds.w = 160;
-    //wallsData->bounds.h = 160;
-    //wallsData->bounds.d = 160;
-    //walls->data = wallsData;
-    //floor->think = floor_rotate;
 
     // main game loop
     slog("MAIN LOOP BEGIN");

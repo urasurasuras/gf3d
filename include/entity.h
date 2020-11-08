@@ -60,6 +60,7 @@ typedef struct{
 	Vector3D velocity;	// Moving direction
 	float speed;		// Speed multiplier
 	Uint32 collider_radius; // Radius of collider sphere
+	float gravity_scale;
 }Rigidbody;
 
 typedef struct Entity_S {
@@ -88,8 +89,11 @@ typedef struct Entity_S {
 
 typedef struct {
 	Entity* owner;
-
 	float power;
+	float time_to_live;
+	float time_alive;
+	void (*touch_ground)(struct Entity_S* self);
+
 }Projectile;
 
 void entity_free(Entity* self);

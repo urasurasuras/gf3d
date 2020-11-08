@@ -8,13 +8,13 @@ void player_weapon_swap(Character * c) {
 void player_hitscan_attack(Entity* self) {
 	Character* character = (Character*)self->data;
 	character->check_for_raycast = 1;
-	self->rotation.x += .01;
+	self->rotation.x += gfc_random() * .02;
 	self->rotation.y += gfc_crandom() * .01;
 	slog("PAP");
 }
 void player_projectile_attack(Entity* self) {
 
-	projectile_spawn(self);
+	projectile_beachball_spawn(self);
 }
 void player_projectile_arrow_attack(Entity* self) {
 
@@ -27,14 +27,10 @@ void player_think(Entity* self, float deltaTime) {
 	self->facingDirection.x = cos(self->rotation.y) /** cos(self->rotation.x)*/;
 	self->facingDirection.y =/* cos(self->rotation.y) **/ sin(self->rotation.x);
 	self->facingDirection.z = sin(self->rotation.y);
-	//slog("Rotation:");
-	//vector3d_slog(self->rotation);
-	//slog("Direction:");
-	//vector3d_slog(character->facingDirection);
 
 	// Set velocity vector with speed
 	self->rigidbody.velocity.x = 0;
-	self->rigidbody.velocity.y = 0;
+	//self->rigidbody.velocity.y = 0;
 	self->rigidbody.velocity.z = 0;
 
 	Vector3D axisR = vector3d(0, 0, 0);
@@ -73,7 +69,8 @@ void player_think(Entity* self, float deltaTime) {
 	if (character->last_CLDN1 + character->CLDN1 < SDL_GetTicks()) {
 		if (keys[SDL_SCANCODE_SPACE]) {
 			character->last_CLDN1 = SDL_GetTicks();
-			self->position.y = 10;
+			self->position.y += 10;
+			//self->rigidbody.velocity.y += 1;
 		}
 	}
 	if (character->last_CLDN2 + character->CLDN2 < SDL_GetTicks()) {		
@@ -128,7 +125,6 @@ void player_think(Entity* self, float deltaTime) {
 
 	}
 
-	vector3d_slog(self->facingDirection);
 	entity_move(self);
 
 }

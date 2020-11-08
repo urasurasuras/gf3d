@@ -120,6 +120,8 @@ void entity_think_all(float deltaTime) {
 		if (!entity_manager.entity_list[i]._inuse)continue;
 		TextWord name;
 		strcpy(name, entity_manager.entity_list[i].name);
+		// Apply gravity
+		entity_manager.entity_list[i].rigidbody.velocity.y -= entity_manager.entity_list[i].rigidbody.gravity_scale * deltaTime;
 		if (entity_manager.entity_list[i].think) {
 			entity_manager.entity_list[i].think(&entity_manager.entity_list[i], deltaTime);
 		}
@@ -128,11 +130,14 @@ void entity_think_all(float deltaTime) {
 }
 
 void entity_entity_collide(Entity* e1, Entity* e2) {
+	if (!(e1 || e2))return;
 	Character* thisChar;
 	Character* otherChar;
 
 	Level* thisLevel;
 	Level* otherLevel;
+
+	Projectile* otherProjecetile;
 
 	RectPrism levelRect;
 	switch (e1->type)
@@ -145,23 +150,58 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			break;
 		}
 		levelRect = thisLevel->bounds;
+
 		switch (e2->type)
 		{
+		case ent_CHAR:
+			// If ent is below ground, pull them up
+			if (e2->position.y - e2->rigidbody.collider_radius < levelRect.y) {
+				e2->position.y = levelRect.y + e2->rigidbody.collider_radius;
+			}
+
+			if (e2->position.x - e2->rigidbody.collider_radius < levelRect.x) {
+				e2->position.x = levelRect.x + (e2->rigidbody.collider_radius);
+			}
+			else if (e2->position.x + e2->rigidbody.collider_radius > levelRect.w) {
+				e2->position.x = levelRect.w - (e2->rigidbody.collider_radius);
+			}
+
+			if (e2->position.z - e2->rigidbody.collider_radius < levelRect.z) {
+				e2->position.z = levelRect.z + (e2->rigidbody.collider_radius);
+			}
+			else if (e2->position.z + e2->rigidbody.collider_radius > levelRect.d) {
+				e2->position.z = levelRect.d - (e2->rigidbody.collider_radius);
+			}
+		break;
+
 		case ent_PROJECTILE:
+			// If projectile hits the ground, execure their respective function
+			if (e2->position.y - e2->rigidbody.collider_radius < levelRect.y) {
+				otherProjecetile = (Projectile*)e2->data;
+				if (!otherProjecetile) {
+					break;
+				}
+				if (!otherProjecetile->touch_ground) {
+					break;
+				}
+				otherProjecetile->touch_ground(e2);
+			}
+
 			if (e2->position.x - e2->rigidbody.collider_radius < levelRect.x ||
 				e2->position.x + e2->rigidbody.collider_radius > levelRect.w ||
 				e2->position.z - e2->rigidbody.collider_radius < levelRect.z ||
 				e2->position.z + e2->rigidbody.collider_radius > levelRect.d
 				) {
-				entity_free(e2);
+				//entity_free(e2);
 			}
-			break;
+		break;
+
 		default:
 			break;
 		}
-		// Level does not need to do anything if it collides with something else
-		// Every entity is responsible for their own collision behavior
-		break;
+
+	break;
+
 	case ent_CHAR:
 
 		thisChar = (Character*)e1->data;
@@ -172,29 +212,6 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			otherLevel = (Level*)e2->data;
 			levelRect = otherLevel->bounds;
 			//e1->position.y -= gameManager()->deltaTime * GRAVITATIONAL_ACCELERATION;
-
-			// If ent is below ground, pull them up
-			if (e1->position.y - e1->rigidbody.collider_radius < levelRect.y) {
-				e1->position.y = levelRect.y + e1->rigidbody.collider_radius;
-			}
-			else {// Apply gravity
-			}
-			//slog("%s at %.2f,%.2f,%.2f", e1->name, e1->position.x, e1->position.y, e1->position.z);
-
-			if (e1->position.x - e1->rigidbody.collider_radius < levelRect.x) {
-				e1->position.x = levelRect.x + (e1->rigidbody.collider_radius);
-			}
-			else if (e1->position.x + e1->rigidbody.collider_radius > levelRect.w) {
-				e1->position.x = levelRect.w - (e1->rigidbody.collider_radius);
-			}
-
-			if (e1->position.z - e1->rigidbody.collider_radius < levelRect.z) {
-				e1->position.z = levelRect.z + (e1->rigidbody.collider_radius);
-			}
-			else if (e1->position.z + e1->rigidbody.collider_radius > levelRect.d) {
-				e1->position.z = levelRect.d - (e1->rigidbody.collider_radius);
-			}
-			
 
 			break;
 		case ent_CHAR:
@@ -249,6 +266,7 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			break;
 		}
 
+		break;
 	case ent_PROJECTILE:
 
 		// if this ent is in circle collision with the other ent
@@ -257,6 +275,8 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 
 			if (e1->touch)
 			{
+				slog("Projectile %s hit ent %s", e1->name, e2->name);
+
 				e1->touch(e1, e2);
 			}
 		}
