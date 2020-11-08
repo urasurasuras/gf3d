@@ -23,13 +23,13 @@ Entity * projectile_beachball_spawn(Entity* owner){
 	self->rigidbody.collider_radius = 1;
 	self->rigidbody.gravity_scale = 1;
 	self->think = entity_move;
+	self->touch_ground = projectile_free_onGround;
 	
 	Projectile * p = malloc(sizeof(Projectile));
 	memset(p, 0, sizeof(Projectile));
 	p->owner = owner;
 	p->power = ownerChar->power * 50;
 	p->time_to_live = 5;
-	p->touch_ground = projectile_free_onGround;
 	self->data = p;
 
 	self->touch = projectile_do_damage;
@@ -58,6 +58,7 @@ Entity * projectile_arrow_spawn(Entity* owner){
 	vector3d_copy(self->rigidbody.velocity, owner->facingDirection);
 	self->rigidbody.speed = 200;
 	self->rigidbody.collider_radius = .1;
+	self->touch_ground = projectile_stay_onGround;
 	self->think = entity_move;
 	
 	Projectile * p = malloc(sizeof(Projectile));
@@ -65,7 +66,6 @@ Entity * projectile_arrow_spawn(Entity* owner){
 	p->owner = owner;
 	p->power = ownerChar->power * 200;
 	p->time_to_live = 5;
-	p->touch_ground = projectile_stay_onGround;
 	self->data = p;
 
 	self->touch = projectile_do_damage;

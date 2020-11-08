@@ -178,13 +178,13 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			// If projectile hits the ground, execure their respective function
 			if (e2->position.y - e2->rigidbody.collider_radius < levelRect.y) {
 				otherProjecetile = (Projectile*)e2->data;
-				if (!otherProjecetile) {
+				if (!e2) {
 					break;
 				}
-				if (!otherProjecetile->touch_ground) {
+				if (!e2->touch_ground) {
 					break;
 				}
-				otherProjecetile->touch_ground(e2);
+				e2->touch_ground(e2);
 			}
 
 			if (e2->position.x - e2->rigidbody.collider_radius < levelRect.x ||
