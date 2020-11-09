@@ -1,4 +1,5 @@
 #include "gfc_vector.h"
+#include "collision.h"
 
 int collide_circle(Vector2D p1, float r1, Vector2D p2, float r2){
     if (vector2d_magnitude_squared(

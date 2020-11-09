@@ -112,6 +112,9 @@ void player_think(Entity* self, float deltaTime) {
 			swapped = 1;
 		}
 		if (keys[SDL_SCANCODE_4]) {
+			character->primaryAttack = projectile_monkeybomb_spawn;
+				character->CLDN2 = 1000;
+			slog("Weapon 4 selected");
 			swapped = 1;
 		}
 		if (keys[SDL_SCANCODE_5]) {
@@ -126,7 +129,7 @@ void player_think(Entity* self, float deltaTime) {
 	}
 
 	entity_move(self);
-
+	slog("%f", self->rigidbody.velocity.y);
 }
 
 void entity_move(Entity * self) {
@@ -143,9 +146,11 @@ void dino_think(Entity * self, float deltaTime) {
 	Character * character = (Character*)self->data;
 
 	Vector2D distance;
-	distance.x = gameManager()->player->position.x - self->position.x;
-	distance.y = gameManager()->player->position.z - self->position.z;
 
+	MOB* mob_data = (MOB*)character->data;
+	Entity* target = mob_data->target;
+	distance.x = target->position.x - self->position.x;
+	distance.y = target->position.z - self->position.z;
 
 	// Set velocity vector with speed
 	self->rigidbody.velocity.x = 0;

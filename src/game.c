@@ -31,7 +31,7 @@ void spawn_dino_random(Model * model) {
     
     
     dino->position.y = 6;//height
-    dino->position.z = gfc_crandom()* gameManager()->level->bounds.d;
+    dino->position.z = gfc_crandom() * gameManager()->level->bounds.d;
     dino->position.x = gfc_crandom() * gameManager()->level->bounds.w;
     //dino->think = floor_rotate;
 
@@ -40,10 +40,15 @@ void spawn_dino_random(Model * model) {
 
     dino->rigidbody.collider_radius = 6;
     sinoData->check_for_raycast = 0;
-    dino->rigidbody.speed = 1;
+    dino->rigidbody.speed = 5;
     sinoData->health = 100;
     dino->modelRotOffset = vector3d(-GFC_HALF_PI, -GFC_HALF_PI, 0);
-    vector3d_slog(dino->position);
+    /*vector3d_slog(dino->position);*/
+
+    sinoData->data = malloc(sizeof(MOB));
+    MOB* mob_data = (MOB*)sinoData->data;
+    mob_data->target = gameManager()->player;
+    slog("Targeting %s", mob_data->target->name);
 }
 
 
@@ -85,9 +90,8 @@ int main(int argc,char *argv[])
     );
 	slog_sync();
 
-    entity_init(32);
+    entity_init(128);
     Model* dinoModel = gf3d_model_load("dino");
-
 
     gameManager()->lastMx = 0;
     gameManager()->lastMy = 0;
@@ -152,6 +156,13 @@ int main(int argc,char *argv[])
     gfc_word_cpy(walls->name, "Walls");
     walls->model = gf3d_model_load("walls");
     walls->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
+
+    spawn_dino_random(dinoModel);
+    spawn_dino_random(dinoModel);
+    spawn_dino_random(dinoModel);
+    spawn_dino_random(dinoModel);
+    spawn_dino_random(dinoModel);
+    spawn_dino_random(dinoModel);
 
     // main game loop
     slog("MAIN LOOP BEGIN");

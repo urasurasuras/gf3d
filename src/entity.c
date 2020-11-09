@@ -3,10 +3,6 @@
 #include "entity.h"
 #include "game.h"
 
-typedef struct {
-	Entity* entity_list;
-	Uint32 entity_count;
-}EntityManager;
 
 static EntityManager entity_manager = { 0 };
 
@@ -157,6 +153,7 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			// If ent is below ground, pull them up
 			if (e2->position.y - e2->rigidbody.collider_radius < levelRect.y) {
 				e2->position.y = levelRect.y + e2->rigidbody.collider_radius;
+				e2->rigidbody.velocity.y = 0;
 			}
 
 			if (e2->position.x - e2->rigidbody.collider_radius < levelRect.x) {
@@ -172,6 +169,7 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			else if (e2->position.z + e2->rigidbody.collider_radius > levelRect.d) {
 				e2->position.z = levelRect.d - (e2->rigidbody.collider_radius);
 			}
+
 		break;
 
 		case ent_PROJECTILE:

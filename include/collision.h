@@ -32,4 +32,6 @@ int linePoint(Vector3D start, Vector3D end, Vector3D p);
 
 int lineCircle(Vector3D start, Vector3D end, Vector3D c, float r);
 
+int collide_sphere(Vector3D p1, float r1, Vector3D p2, float r2);
+
 #endif

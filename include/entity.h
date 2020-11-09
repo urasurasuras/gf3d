@@ -6,6 +6,7 @@
 #include "gf3d_model.h"
 #include "gfc_matrix.h"
 
+
 typedef enum{
 	ent_NULL,
 	ent_LEVEL,
@@ -18,7 +19,6 @@ typedef enum{
 	char_PLAYER,
 	char_AI
 }CharType;
-
 
 /**
  Types of different entities
@@ -38,6 +38,7 @@ typedef struct{
 
 typedef struct{
 	CharType type;
+	void* data;
 
 	Uint32 check_for_raycast;
 	float health;
@@ -90,11 +91,21 @@ typedef struct Entity_S {
 }Entity;
 
 typedef struct {
+	Entity* entity_list;
+	Uint32 entity_count;
+}EntityManager;
+
+typedef struct {
+	Entity* target;
+}MOB;
+
+typedef struct {
 	Entity* owner;
 	float power;
 	float time_to_live;
 	float time_alive;
 
+	void (*explode)(Entity* self);
 }Projectile;
 
 void entity_free(Entity* self);
@@ -110,4 +121,6 @@ void entity_collision_check(Entity* entity);
 void entity_entity_collide(Entity* self, Entity* other);
 
 void sphere_to_sphere_pushback(Entity* e1, Entity* e2);
+
+EntityManager* get_entity_manager();
 #endif // !_ENTITY_H_
