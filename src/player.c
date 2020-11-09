@@ -1,12 +1,8 @@
 #include "player.h"
 #include "simple_logger.h"
 
-void player_weapon_swap(Character * c) {
-
-
-}
 void player_hitscan_attack(Entity* self) {
-	Character* character = (Character*)self->data;
+	Character* character = (Character*)self->entData;
 	character->check_for_raycast = 1;
 	self->rotation.x += gfc_random() * .02;
 	self->rotation.y += gfc_crandom() * .01;
@@ -21,7 +17,7 @@ void player_projectile_arrow_attack(Entity* self) {
 	projectile_arrow_spawn(self);
 }
 void player_think(Entity* self, float deltaTime) {	
-	Character* character = (Character*)self->data;
+	Character* character = (Character*)self->entData;
 
 	// Set facing direction to rotation
 	self->facingDirection.x = cos(self->rotation.y) /** cos(self->rotation.x)*/;
@@ -85,9 +81,7 @@ void player_think(Entity* self, float deltaTime) {
 	else
 	{
 		character->check_for_raycast = 0;
-	}	
-
-	
+	}		
 
 	if (character->last_CLDN3 + character->CLDN3 < SDL_GetTicks()) {
 		//slog("%d", SDL_GetTicks());
@@ -113,7 +107,7 @@ void player_think(Entity* self, float deltaTime) {
 		}
 		if (keys[SDL_SCANCODE_4]) {
 			character->primaryAttack = projectile_monkeybomb_spawn;
-				character->CLDN2 = 1000;
+				character->CLDN2 = 10000;
 			slog("Weapon 4 selected");
 			swapped = 1;
 		}
@@ -127,13 +121,19 @@ void player_think(Entity* self, float deltaTime) {
 		//slog("%d", character->last_CLDN3);
 
 	}
-
+	self->rigidbody.speed *= character->speed_buff;
 	entity_move(self);
-	slog("%f", self->rigidbody.velocity.y);
+
+	if (character->speed_buff < 1) {
+		character->speed_buff = 1;
+	}
+	else {
+		character->speed_buff -= deltaTime;
+	}
 }
 
 void entity_move(Entity * self) {
-	Character * character = self->data;
+	Character * character = self->entData;
 
 	// Increment position from velocity
 	self->position.x += (self->rigidbody.velocity.x * self->rigidbody.speed * gameManager()->deltaTime);
@@ -143,18 +143,18 @@ void entity_move(Entity * self) {
 }
 
 void dino_think(Entity * self, float deltaTime) {
-	Character * character = (Character*)self->data;
+	Character * character = (Character*)self->entData;
 
 	Vector2D distance;
 
-	MOB* mob_data = (MOB*)character->data;
+	MOB* mob_data = (MOB*)character->charData;
 	Entity* target = mob_data->target;
 	distance.x = target->position.x - self->position.x;
 	distance.y = target->position.z - self->position.z;
 
 	// Set velocity vector with speed
 	self->rigidbody.velocity.x = 0;
-	self->rigidbody.velocity.y = 0;
+	//self->rigidbody.velocity.y = 0;
 	self->rigidbody.velocity.z = 0;
 
 	self->rotation.y = atan2(distance.y, distance.x);
@@ -167,8 +167,8 @@ void dino_think(Entity * self, float deltaTime) {
 	self->rigidbody.velocity.z = self->facingDirection.z;
 	//vector3d_sub(self->rotation, gameManager()->player->position, self->position);
 	entity_move(self);
-	//self->position.z += 0.01;
-	//vector3d_slog(self->position);vector3d_slog(gameManager()->player->position);
+	//self->position.y -= 0.01;
+	/*vector3d_slog(gameManager()->player->position);*/
 	if (character->health < 0) {
 		entity_free(self);
 	}	
@@ -180,10 +180,60 @@ void entity_touch(Entity * self, Entity * other) {
 }
 void dino_touch(Entity* self, Entity* other) {
 	if (other->type == ent_CHAR) {
-		Character* c = (Character*)other->data;
+		Character* c = (Character*)other->entData;
 		if (c->type == char_PLAYER) {
 			c->health -= 0.1;
 		}
 	}
 }
 
+void pickup_health(Entity * self, Entity * other){
+
+	Character* c = (Character*)other->entData;
+	if (c->type == char_PLAYER) {
+		c->health += 100;
+	}
+	slog("%s health now: %.2f", other->name, c->health);
+
+	entity_free(self);
+}
+void pickup_speed(Entity * self, Entity * other){
+
+	Character* c = (Character*)other->entData;
+	if (c->type == char_PLAYER) {
+		c->speed_buff = 5;
+	}
+	slog("%s gave speed buff: x%.2f", other->name, c->speed_buff);
+	entity_free(self);
+
+}
+void pickup_damage(Entity * self, Entity * other){
+	
+	for (Uint32 i = 0; i < get_entity_manager()->entity_count; i++) {
+		Entity* other = &get_entity_manager()->entity_list[i];
+		Character* otherChar = (Character*)other->entData;
+
+		if (!other->_inuse)continue;
+		if (!otherChar)continue;
+
+		switch (other->type)
+		{
+		case ent_CHAR:
+			if (otherChar->type == char_PLAYER)break;
+			// Do damage
+			otherChar->health = 1;
+			break;
+		default:
+			break;
+		}
+	}
+	entity_free(self);
+}
+
+void sine_movement(Entity* self) {
+
+	self->position.y = (sin(SDL_GetTicks() * 0.01));
+	self->position.y += self->rigidbody.collider_radius;
+
+	//slog("%f", self->position.y);
+}

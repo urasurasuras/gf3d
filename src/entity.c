@@ -118,6 +118,10 @@ void entity_think_all(float deltaTime) {
 		strcpy(name, entity_manager.entity_list[i].name);
 		// Apply gravity
 		entity_manager.entity_list[i].rigidbody.velocity.y -= entity_manager.entity_list[i].rigidbody.gravity_scale * deltaTime;
+
+		if (!gfc_word_cmp(entity_manager.entity_list[i].name, "Dino") ){
+			//vector3d_slog(entity_manager.entity_list[i].rigidbody.velocity);
+		}
 		if (entity_manager.entity_list[i].think) {
 			entity_manager.entity_list[i].think(&entity_manager.entity_list[i], deltaTime);
 		}
@@ -140,7 +144,7 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 	{
 	case ent_LEVEL:
 
-		thisLevel = (Level*)e1->data;
+		thisLevel = (Level*)e1->entData;
 		if (!thisLevel) {
 			slog("This ent is not a leve!");
 			break;
@@ -150,8 +154,17 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 		switch (e2->type)
 		{
 		case ent_CHAR:
+
+			if (!gfc_word_cmp(e2->name, "Dino")) {
+				//vector3d_slog(e2->rigidbody.velocity);
+			}
 			// If ent is below ground, pull them up
 			if (e2->position.y - e2->rigidbody.collider_radius < levelRect.y) {
+
+				if (!gfc_word_cmp(e2->name, "Dino")) {
+					//vector3d_slog(e2->rigidbody.velocity);
+				}
+
 				e2->position.y = levelRect.y + e2->rigidbody.collider_radius;
 				e2->rigidbody.velocity.y = 0;
 			}
@@ -173,9 +186,9 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 		break;
 
 		case ent_PROJECTILE:
-			// If projectile hits the ground, execure their respective function
+			// If projectile hits the ground, execute their respective function
 			if (e2->position.y - e2->rigidbody.collider_radius < levelRect.y) {
-				otherProjecetile = (Projectile*)e2->data;
+				otherProjecetile = (Projectile*)e2->entData;
 				if (!e2) {
 					break;
 				}
@@ -190,11 +203,24 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 				e2->position.z - e2->rigidbody.collider_radius < levelRect.z ||
 				e2->position.z + e2->rigidbody.collider_radius > levelRect.d
 				) {
-				//entity_free(e2);
+				entity_free(e2);
 			}
 		break;
 
 		default:
+			//// If ent is below ground, pull them up
+			//if (e2->position.y - e2->rigidbody.collider_radius < levelRect.y) {
+			//	e2->position.y = levelRect.y + e2->rigidbody.collider_radius;
+			//	e2->rigidbody.velocity.y = 0;
+			//}
+
+			//if (e2->position.x - e2->rigidbody.collider_radius < levelRect.x ||
+			//	e2->position.x + e2->rigidbody.collider_radius > levelRect.w ||
+			//	e2->position.z - e2->rigidbody.collider_radius < levelRect.z ||
+			//	e2->position.z + e2->rigidbody.collider_radius > levelRect.d
+			//	) {
+			//	entity_free(e2);
+			//}
 			break;
 		}
 
@@ -202,19 +228,19 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 
 	case ent_CHAR:
 
-		thisChar = (Character*)e1->data;
+		thisChar = (Character*)e1->entData;
 
 		switch (e2->type)
 		{
 		case ent_LEVEL:
-			otherLevel = (Level*)e2->data;
+			otherLevel = (Level*)e2->entData;
 			levelRect = otherLevel->bounds;
 			//e1->position.y -= gameManager()->deltaTime * GRAVITATIONAL_ACCELERATION;
 
 			break;
 		case ent_CHAR:
 
-			otherChar = (Character*)e2->data;
+			otherChar = (Character*)e2->entData;
 
 			if (!thisChar) {
 				slog("%s is not a character! (has null data pointer)", e1->name);
@@ -229,6 +255,8 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			if (collide_sphere(e1->position, e1->rigidbody.collider_radius, e2->position, e2->rigidbody.collider_radius))
 			{// Sphere-to-sphere
 				sphere_to_sphere_pushback(e1, e2);
+
+				//slog("%s colliding with %s", e1->name, e2->name);
 
 				if (e1->touch)
 				{
@@ -264,7 +292,8 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			break;
 		}
 
-		break;
+	break;
+
 	case ent_PROJECTILE:
 
 		// if this ent is in circle collision with the other ent
@@ -273,8 +302,25 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 
 			if (e1->touch)
 			{
-				slog("Projectile %s hit ent %s", e1->name, e2->name);
 
+				e1->touch(e1, e2);
+			}
+		}
+		break;
+
+	case ent_PICKUP:
+
+		otherChar = (Character*)e2->entData;
+		if (!otherChar)break;
+
+		if (otherChar->type != char_PLAYER)break;
+
+		// if this ent is in circle collision with the other ent
+		if (collide_sphere(e1->position, e1->rigidbody.collider_radius, e2->position, e2->rigidbody.collider_radius))
+		{// Sphere-to-sphere
+
+			if (e1->touch)
+			{
 				e1->touch(e1, e2);
 			}
 		}

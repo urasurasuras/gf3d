@@ -21,14 +21,6 @@
 #define window_H 900
 
 #define GRAVITATIONAL_ACCELERATION 8 // yea, it's 8, deal with it
-//
-//typedef struct Level_S {
-//	Model* model;
-//	Matrix4 modelMatrix;
-//	Vector3D modelPosOffset;	// Model position offset
-//	Vector3D modelRotOffset;	// Model rotation offset 
-//
-//}Level;
 
 typedef struct GameManager_S {
 	Entity * player;
@@ -40,7 +32,6 @@ typedef struct GameManager_S {
 	int mx, my;
 	int lastMx, lastMy;
 }GameManager;
-
 
 const Uint8* keys;
 

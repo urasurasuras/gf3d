@@ -19,7 +19,7 @@ Entity* projectile_spawn(Entity* owner) {
 	memset(p, 0, sizeof(Projectile));
 	p->owner = owner;
 
-	self->data = p;
+	self->entData = p;
 
 	return self;
 }
@@ -29,7 +29,7 @@ Entity * projectile_beachball_spawn(Entity* owner){
 	Entity* self = projectile_spawn(owner);
 	if (!self) { return; }
 
-	Character* ownerChar = (Character*)owner->data;
+	Character* ownerChar = (Character*)owner->entData;
 
 	self->model = gf3d_model_load("beachball");
 	gfc_word_cpy(self->name, "Beachball");
@@ -40,7 +40,7 @@ Entity * projectile_beachball_spawn(Entity* owner){
 	self->think = entity_move;
 	self->touch_ground = projectile_free_onGround;
 	
-	Projectile* p = (Projectile*)self->data;
+	Projectile* p = (Projectile*)self->entData;
 	p->power = ownerChar->power * 50;
 	p->time_to_live = 5;
 
@@ -54,7 +54,7 @@ Entity * projectile_monkeybomb_spawn(Entity* owner){
 	Entity* self = projectile_spawn(owner);
 	if (!self) { return; }
 
-	Character* ownerChar = (Character*)owner->data;
+	Character* ownerChar = (Character*)owner->entData;
 
 	self->model = gf3d_model_load("beachball");
 	gfc_word_cpy(self->name, "Monkey Bomb");
@@ -65,7 +65,7 @@ Entity * projectile_monkeybomb_spawn(Entity* owner){
 	self->think = entity_move;
 	self->touch_ground = projectile_stay_onGround;
 	
-	Projectile* p = (Projectile*)self->data;
+	Projectile* p = (Projectile*)self->entData;
 	p->power = ownerChar->power * 50;
 	p->time_to_live = 5;
 	p->explode = projectile_explode;
@@ -76,7 +76,7 @@ Entity * projectile_monkeybomb_spawn(Entity* owner){
 
 	for (Uint32 i = 0; i < get_entity_manager()->entity_count; i++) {
 		Entity* other = &get_entity_manager()->entity_list[i];
-		Character* otherChar = (Character*)other->data;
+		Character* otherChar = (Character*)other->entData;
 		MOB* otherMOB;
 
 		if (!other->_inuse)continue;
@@ -85,7 +85,7 @@ Entity * projectile_monkeybomb_spawn(Entity* owner){
 		switch (other->type)
 		{
 		case ent_CHAR:
-			otherMOB = (MOB*)otherChar->data;
+			otherMOB = (MOB*)otherChar->charData;
 			if (!otherMOB)break;
 			if (otherChar->type == char_PLAYER)break;
 
@@ -104,7 +104,7 @@ Entity * projectile_arrow_spawn(Entity* owner){
 	Entity* self = projectile_spawn(owner);
 	if (!self) { return; }
 
-	Character* ownerChar = (Character*)owner->data;
+	Character* ownerChar = (Character*)owner->entData;
 
 	self->model = gf3d_model_load("arrow");
 	gfc_word_cpy(self->name, "Arrow");
@@ -114,10 +114,10 @@ Entity * projectile_arrow_spawn(Entity* owner){
 	self->touch_ground = projectile_stay_onGround;
 	self->think = entity_move;
 	
-	Projectile* p = (Projectile*)self->data;
+	Projectile* p = (Projectile*)self->entData;
 	p->power = ownerChar->power * 200;
 	p->time_to_live = 5;
-	self->data = p;
+	self->entData = p;
 
 	self->touch = projectile_do_damage;
 
@@ -125,9 +125,9 @@ Entity * projectile_arrow_spawn(Entity* owner){
 }
 
 void projectile_do_damage(Entity* self, Entity* other) {
-	Projectile * p = (Projectile*)self->data;
+	Projectile * p = (Projectile*)self->entData;
 	if (p->owner == other)return;
-	Character * otherChar = (Character*)other->data;
+	Character * otherChar = (Character*)other->entData;
 
 	otherChar->health -= p->power;
 	
@@ -142,7 +142,7 @@ void projectile_free_onGround(Entity* self) {
 }
 void projectile_stay_onGround(Entity* self) {
 	slog("%s toched the grond", self->name);
-	Projectile* p = (Projectile*)self->data;
+	Projectile* p = (Projectile*)self->entData;
 
 	p->time_alive += gameManager()->deltaTime;
 	//slog("%f", p->time_alive);
@@ -164,7 +164,7 @@ void projectile_explode(Entity* self) {
 
 	for (Uint32 i = 0; i < get_entity_manager()->entity_count; i++) {
 		Entity* other = &get_entity_manager()->entity_list[i];
-		Character* otherChar = (Character*)other->data;
+		Character* otherChar = (Character*)other->entData;
 
 		if (!other->_inuse)continue;
 		if (!otherChar)continue;
@@ -186,7 +186,7 @@ void projectile_explode(Entity* self) {
 	// After explosion, set the targets back
 	for (Uint32 i = 0; i < get_entity_manager()->entity_count; i++) {
 		Entity* other = &get_entity_manager()->entity_list[i];
-		Character* otherChar = (Character*)other->data;
+		Character* otherChar = (Character*)other->entData;
 		MOB* otherMOB;
 
 		if (!other->_inuse)continue;
@@ -195,7 +195,7 @@ void projectile_explode(Entity* self) {
 		switch (other->type)
 		{
 		case ent_CHAR:
-			otherMOB = (MOB*)otherChar->data;
+			otherMOB = (MOB*)otherChar->charData;
 			if (!otherMOB)break;
 			if (otherChar->type == char_PLAYER)break;
 

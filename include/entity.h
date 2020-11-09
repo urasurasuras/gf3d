@@ -11,7 +11,8 @@ typedef enum{
 	ent_NULL,
 	ent_LEVEL,
 	ent_CHAR,
-	ent_PROJECTILE
+	ent_PROJECTILE,
+	ent_PICKUP
 }EntType;
 
 typedef enum{
@@ -20,9 +21,7 @@ typedef enum{
 	char_AI
 }CharType;
 
-/**
- Types of different entities
-*/
+
 typedef struct{
 	float x;
 	float y;
@@ -32,31 +31,9 @@ typedef struct{
 	float d;// Depth
 }RectPrism;
 
-typedef struct{
-	RectPrism bounds;
-}Level;
-
-typedef struct{
-	CharType type;
-	void* data;
-
-	Uint32 check_for_raycast;
-	float health;
-
-	// Cooldowns
-	int CLDN1;
-	int last_CLDN1;
-	int CLDN2;
-	int last_CLDN2;
-	int CLDN3;
-	int last_CLDN3;
-
-	float power;
-
-	void (*primaryAttack)(struct Entity_S* self);
-
-}Character;
-
+/**
+ ENTITY COMPONENTS
+*/
 typedef struct{
 	Vector3D velocity;	// Moving direction
 	float speed;		// Speed multiplier
@@ -64,11 +41,14 @@ typedef struct{
 	float gravity_scale;
 }Rigidbody;
 
+/**
+ ENTITY 
+*/
 typedef struct Entity_S {
 	Uint8 _inuse;
 	TextWord name;
 	EntType type;
-	void* data;
+	void* entData;
 
 	// Model
 	Model* model;
@@ -95,9 +75,44 @@ typedef struct {
 	Uint32 entity_count;
 }EntityManager;
 
+/**
+ CHARACTER TYPES
+*/
 typedef struct {
 	Entity* target;
 }MOB;
+
+/**
+ ENTITY TYPES
+*/
+
+typedef struct {
+	RectPrism bounds;
+}Level;
+
+typedef struct {
+	CharType type;
+	void* charData;
+
+	Uint32 check_for_raycast;
+	float health;
+
+	// Cooldowns
+	int CLDN1;
+	int last_CLDN1;
+	int CLDN2;
+	int last_CLDN2;
+	int CLDN3;
+	int last_CLDN3;
+
+	// Buffs
+	float speed_buff;
+
+	float power;
+
+	void (*primaryAttack)(struct Entity_S* self);
+
+}Character;
 
 typedef struct {
 	Entity* owner;
@@ -107,6 +122,17 @@ typedef struct {
 
 	void (*explode)(Entity* self);
 }Projectile;
+
+typedef enum {
+	pickup_HEAL,
+	pickup_DMGBUFF,
+	pickup_SPEEDBUFF
+}PickupType;
+
+typedef struct {
+	PickupType* type;
+	float duration;
+}Pickup;
 
 void entity_free(Entity* self);
 void entity_init(Uint32 max);

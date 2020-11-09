@@ -1,5 +1,6 @@
 #include "game.h"
 #include "gfc_matrix.h"
+#include "gfc_types.h"
 
 void floor_rotate(Entity* self, float deltaTime) {
     if (keys[SDL_SCANCODE_Q]) {
@@ -22,9 +23,9 @@ void floor_rotate(Entity* self, float deltaTime) {
 void spawn_dino_random(Model * model) {
     // Create ent
     Entity* dino = entity_new();
-    if (!dino) { return; }
-    dino->data = malloc(sizeof(Character));
-    Character* sinoData = (Character*)dino->data;
+    if (!dino)return;
+    dino->entData = malloc(sizeof(Character));
+    Character* sinoData = (Character*)dino->entData;
     dino->type = ent_CHAR;
     gfc_word_cpy(dino->name, "Dino");
     dino->model = gf3d_model_load("dino");
@@ -39,16 +40,55 @@ void spawn_dino_random(Model * model) {
     dino->touch = dino_touch;
 
     dino->rigidbody.collider_radius = 6;
+    dino->rigidbody.gravity_scale = 1;
     sinoData->check_for_raycast = 0;
     dino->rigidbody.speed = 5;
     sinoData->health = 100;
     dino->modelRotOffset = vector3d(-GFC_HALF_PI, -GFC_HALF_PI, 0);
     /*vector3d_slog(dino->position);*/
 
-    sinoData->data = malloc(sizeof(MOB));
-    MOB* mob_data = (MOB*)sinoData->data;
+    sinoData->charData = malloc(sizeof(MOB));
+    MOB* mob_data = (MOB*)sinoData->charData;
     mob_data->target = gameManager()->player;
     slog("Targeting %s", mob_data->target->name);
+}
+
+void spawn_pickup_random() {
+    
+    Entity* self = entity_new();
+    if (!self)return;
+
+    self->type = ent_PICKUP;
+    gfc_word_cpy(self->name, "Pickup");
+    self->rigidbody.collider_radius = 4;
+    self->think = sine_movement;
+
+    self->position.z = gfc_crandom() * gameManager()->level->bounds.d;
+    self->position.x = gfc_crandom() * gameManager()->level->bounds.w;
+    int index = FLOAT_TO_INT(gfc_random() * 3);
+    //slog("%d", index);
+    switch (index)
+    {
+    case 0:
+        self->model = gf3d_model_load("pickup_health");
+        self->touch = pickup_health;
+        break;
+    case 1:
+        self->model = gf3d_model_load("pickup_damage");
+        self->touch = pickup_damage;
+
+        break;
+    case 2:
+        self->model = gf3d_model_load("pickup_speed");
+        self->touch = pickup_speed;
+
+        break;
+    default:
+        break;
+    }
+    //self->model
+
+
 }
 
 
@@ -100,8 +140,8 @@ int main(int argc,char *argv[])
 
     // Create PLAYER
     Entity* player = entity_new();
-    player->data = malloc(sizeof(Character));
-    Character* playerData = (Character*)player->data;
+    player->entData = malloc(sizeof(Character));
+    Character* playerData = (Character*)player->entData;
     gfc_word_cpy(player->name, "Player");
     gf3d_get_cam()->player = player;
     player->think = player_think;
@@ -127,6 +167,8 @@ int main(int argc,char *argv[])
     playerData->primaryAttack = player_hitscan_attack;
 
     playerData->health = 100;
+
+    playerData->speed_buff = 1;
     //player->model = gf3d_model_load("USP45");
     playerData->type = char_PLAYER;
     player->modelPosOffset = vector3d(0, 0, 10);
@@ -137,8 +179,8 @@ int main(int argc,char *argv[])
    
     // Create FLOOR
     Entity* floor = entity_new();
-    floor->data = malloc(sizeof(Level));
-    Level* floorData = (Level*)floor->data;
+    floor->entData = malloc(sizeof(Level));
+    Level* floorData = (Level*)floor->entData;
     floor->type = ent_LEVEL;
     gfc_word_cpy(floor->name, "Floor");
     floor->model = gf3d_model_load("floor");
@@ -149,7 +191,7 @@ int main(int argc,char *argv[])
     floorData->bounds.w = 160;
     floorData->bounds.h = 160;
     floorData->bounds.d = 160;
-    floor->data = floorData;
+    floor->entData = floorData;
     gameManager()->level = floorData;//FIX: level bounds not correct
 
     Entity* walls = entity_new();
@@ -158,11 +200,11 @@ int main(int argc,char *argv[])
     walls->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
 
     spawn_dino_random(dinoModel);
-    spawn_dino_random(dinoModel);
-    spawn_dino_random(dinoModel);
-    spawn_dino_random(dinoModel);
-    spawn_dino_random(dinoModel);
-    spawn_dino_random(dinoModel);
+    //spawn_dino_random(dinoModel);
+    //spawn_dino_random(dinoModel);
+    //spawn_dino_random(dinoModel);
+    //spawn_dino_random(dinoModel);
+    //spawn_dino_random(dinoModel);
 
     // main game loop
     slog("MAIN LOOP BEGIN");
@@ -220,7 +262,8 @@ int main(int argc,char *argv[])
 
         if (lastEnemySpawn + EnemySpawnCldn < SDL_GetTicks()) {
             lastEnemySpawn = SDL_GetTicks();
-            spawn_dino_random(dinoModel);
+            //spawn_dino_random(dinoModel);
+            spawn_pickup_random();
         }
 
         SDL_WarpMouseInWindow(NULL, half_w, half_h);
