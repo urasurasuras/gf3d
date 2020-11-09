@@ -17,5 +17,6 @@ void player_projectile_attack(Entity* self);
 void pickup_health(Entity* self, Entity* other);
 void pickup_speed(Entity* self, Entity* other);
 void pickup_damage(Entity* self, Entity* other);
+void pickup_kaboom(Entity* self, Entity* other);
 void sine_movement(Entity* self);
 #endif // !1

@@ -219,13 +219,42 @@ void pickup_damage(Entity * self, Entity * other){
 		switch (other->type)
 		{
 		case ent_CHAR:
-			if (otherChar->type == char_PLAYER)break;
-			// Do damage
-			otherChar->health = 1;
+			if (otherChar->type == char_AI) {
+				// Do damage
+				otherChar->health = 1;
+				slog("can instakill %s on %.2f", other->name, otherChar->health);
+
+			}
 			break;
 		default:
 			break;
 		}
+	}
+	entity_free(self);
+}
+void pickup_kaboom(Entity * self, Entity * other){
+	
+	for (Uint32 i = 0; i < get_entity_manager()->entity_count; i++) {
+		Entity* other = &get_entity_manager()->entity_list[i];
+		Character* otherChar = (Character*)other->entData;
+
+		if (!other->_inuse)continue;
+		if (!otherChar)continue;
+
+		switch (other->type)
+		{
+		case ent_CHAR:
+			if (otherChar->type == char_AI) {
+				// Do damage
+				slog("kaboom target %s", other->name);
+
+				entity_free(other);
+			}
+			break;
+		default:
+			break;
+		}
+
 	}
 	entity_free(self);
 }

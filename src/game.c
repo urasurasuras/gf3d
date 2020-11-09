@@ -44,6 +44,7 @@ void spawn_dino_random(Model * model) {
     sinoData->check_for_raycast = 0;
     dino->rigidbody.speed = 5;
     sinoData->health = 100;
+    sinoData->type = char_AI;
     dino->modelRotOffset = vector3d(-GFC_HALF_PI, -GFC_HALF_PI, 0);
     /*vector3d_slog(dino->position);*/
 
@@ -65,7 +66,7 @@ void spawn_pickup_random() {
 
     self->position.z = gfc_crandom() * gameManager()->level->bounds.d;
     self->position.x = gfc_crandom() * gameManager()->level->bounds.w;
-    int index = FLOAT_TO_INT(gfc_random() * 3);
+    int index = FLOAT_TO_INT(gfc_random() * 3.5);
     //slog("%d", index);
     switch (index)
     {
@@ -81,6 +82,11 @@ void spawn_pickup_random() {
     case 2:
         self->model = gf3d_model_load("pickup_speed");
         self->touch = pickup_speed;
+
+        break;
+    case 3:
+        self->model = gf3d_model_load("pickup_kaboom");
+        self->touch = pickup_kaboom;
 
         break;
     default:
@@ -200,11 +206,11 @@ int main(int argc,char *argv[])
     walls->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
 
     spawn_dino_random(dinoModel);
-    //spawn_dino_random(dinoModel);
-    //spawn_dino_random(dinoModel);
-    //spawn_dino_random(dinoModel);
-    //spawn_dino_random(dinoModel);
-    //spawn_dino_random(dinoModel);
+    spawn_dino_random(dinoModel);
+    spawn_dino_random(dinoModel);
+    spawn_dino_random(dinoModel);
+    spawn_dino_random(dinoModel);
+    spawn_dino_random(dinoModel);
 
     // main game loop
     slog("MAIN LOOP BEGIN");
@@ -262,7 +268,7 @@ int main(int argc,char *argv[])
 
         if (lastEnemySpawn + EnemySpawnCldn < SDL_GetTicks()) {
             lastEnemySpawn = SDL_GetTicks();
-            //spawn_dino_random(dinoModel);
+            spawn_dino_random(dinoModel);
             spawn_pickup_random();
         }
 

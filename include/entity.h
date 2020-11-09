@@ -126,7 +126,8 @@ typedef struct {
 typedef enum {
 	pickup_HEAL,
 	pickup_DMGBUFF,
-	pickup_SPEEDBUFF
+	pickup_SPEEDBUFF,
+	pickup_KABOOM
 }PickupType;
 
 typedef struct {
