@@ -56,10 +56,10 @@ void player_think(Entity* self, float deltaTime) {
 	}
 
 	if (keys[SDL_SCANCODE_LSHIFT]) {
-		self->rigidbody.speed = 30;
+		self->rigidbody.speed = 35;
 	}
 	else {
-		self->rigidbody.speed = 20;
+		self->rigidbody.speed = 15;
 	}
 
 	if (character->last_CLDN1 + character->CLDN1 < SDL_GetTicks()) {
@@ -107,7 +107,7 @@ void player_think(Entity* self, float deltaTime) {
 		}
 		if (keys[SDL_SCANCODE_4]) {
 			character->primaryAttack = projectile_monkeybomb_spawn;
-				character->CLDN2 = 10000;
+				character->CLDN2 = 5000;
 			slog("Weapon 4 selected");
 			swapped = 1;
 		}
