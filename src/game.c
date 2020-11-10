@@ -200,8 +200,8 @@ int main(int argc,char *argv[])
         //update game things here
         //slog("deltaTime: %f", gameManager()->deltaTime);
         // Get mouse input delta
-        player->rotation.x -= (gameManager()->my - half_h) * gameManager()->deltaTime;// V look (pitch)
-        player->rotation.y += (gameManager()->mx - half_w) * gameManager()->deltaTime;// H look (yaw)
+        player->rotation.x -= (gameManager()->my - half_h) * 0.001;// V look (pitch)
+        player->rotation.y += (gameManager()->mx - half_w) * 0.001;// H look (yaw)
 
         gf3d_get_cam()->rotation.x = player->rotation.x;
         gf3d_get_cam()->rotation.y = player->rotation.y;
@@ -241,11 +241,11 @@ int main(int argc,char *argv[])
         
         if (yellow_dino_spawn_last + yellow_dino_spawn_cldn < SDL_GetTicks()) {
             yellow_dino_spawn_last = SDL_GetTicks();
-            //spawn_dino_yellow_random();
+            spawn_dino_yellow_random();
         }
         if (red_dino_spawn_last + red_dino_spawn_cldn < SDL_GetTicks()) {
             red_dino_spawn_last = SDL_GetTicks();
-            //spawn_dino_red_random();
+            spawn_dino_red_random();
         }
         if (blue_dino_spawn_last + blue_dino_spawn_cldn < SDL_GetTicks()) {
             blue_dino_spawn_last = SDL_GetTicks();
@@ -253,7 +253,7 @@ int main(int argc,char *argv[])
         }
         if (pickup_spawn_last + pickup_spawn_cldn < SDL_GetTicks()) {
             pickup_spawn_last = SDL_GetTicks();
-            //spawn_pickup_random();
+            spawn_pickup_random();
         }
 
 

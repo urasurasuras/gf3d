@@ -154,6 +154,7 @@ void projectile_do_damage(Entity* self, Entity* other) {
 	Projectile * p = (Projectile*)self->entData;
 	if (p->owner == other)return;
 	Character * otherChar = (Character*)other->entData;
+	if (!otherChar)return;
 
 	otherChar->health -= p->power;
 	
