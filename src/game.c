@@ -180,11 +180,11 @@ int main(int argc,char *argv[])
     walls->model = gf3d_model_load("walls");
     walls->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
 
-    //spawn_dino_yellow_random(dinoModel);
-    //spawn_dino_yellow_random(dinoModel);
-    //spawn_dino_yellow_random(dinoModel);
-    //spawn_dino_yellow_random(dinoModel);
-    //spawn_dino_yellow_random(dinoModel);
+    spawn_dino_yellow_random(dinoModel);
+    spawn_dino_yellow_random(dinoModel);
+    spawn_dino_yellow_random(dinoModel);
+    spawn_dino_yellow_random(dinoModel);
+    spawn_dino_yellow_random(dinoModel);
 
     // main game loop
     slog("MAIN LOOP BEGIN");
@@ -234,10 +234,9 @@ int main(int argc,char *argv[])
 
         gameManager()->deltaTime = ((float)(NOW - LAST) / (float)SDL_GetPerformanceFrequency());*/
 
-        if (play) {
-            entity_think_all(gameManager()->deltaTime);
+        //if (play) {
             //slog("FPS: %.0f", 1/ gameManager()->deltaTime);
-        }
+        //}
         
         if (yellow_dino_spawn_last + yellow_dino_spawn_cldn < SDL_GetTicks()) {
             yellow_dino_spawn_last = SDL_GetTicks();
@@ -258,6 +257,7 @@ int main(int argc,char *argv[])
 
 
         SDL_WarpMouseInWindow(NULL, half_w, half_h);
+        gf3d_vgraphics_update_view();
 
         // configure render command for graphics command pool
         // for each mesh, get a command and configure it from the pool
@@ -265,7 +265,7 @@ int main(int argc,char *argv[])
         gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_pipeline(),bufferFrame);
             commandBuffer = gf3d_command_rendering_begin(bufferFrame);
 
-            gf3d_vgraphics_update_view();
+            entity_think_all(gameManager()->deltaTime);
 
             entity_draw_all(bufferFrame, commandBuffer);
 
@@ -274,7 +274,10 @@ int main(int argc,char *argv[])
         gf3d_vgraphics_render_end(bufferFrame);
 
         play = 1; // start game after we are done with the first game loop
-        if (playerData->health <= 0) { done = 1; slog("Player health %.2f", playerData->health); }
+        if (playerData->health <= 0) { 
+            done = 1; 
+            slog("Player health %.2f", playerData->health); 
+        }
         if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
     }    
     

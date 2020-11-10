@@ -39,6 +39,7 @@ void entity_init(Uint32 max) {
 	}
 
 	entity_manager.entity_count = max;
+	slog("Entity manager initialized with %d entites", entity_manager.entity_count);
 }
 Entity* entity_new() {
 	
@@ -158,15 +159,8 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 		{
 		case ent_CHAR:
 
-			if (!gfc_word_cmp(e2->name, "Dino")) {
-				//vector3d_slog(e2->rigidbody.velocity);
-			}
 			// If ent is below ground, pull them up
 			if (e2->position.y - e2->rigidbody.collider_radius < levelRect.y) {
-
-				if (!gfc_word_cmp(e2->name, "Dino")) {
-					//vector3d_slog(e2->rigidbody.velocity);
-				}
 
 				e2->position.y = levelRect.y + e2->rigidbody.collider_radius;
 				e2->rigidbody.velocity.y = 0;
@@ -258,7 +252,7 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			if (collide_sphere(e1->position, e1->rigidbody.collider_radius, e2->position, e2->rigidbody.collider_radius))
 			{// Sphere-to-sphere
 				
-				if (otherChar->type == char_AI) {
+				if (otherChar->type == char_AI && thisChar->type == char_AI) {
 					otherMob = (MOB*)otherChar->charData;
 					if (otherMob->mobType == mob_YELLOW) {
 						entity_free(e2);

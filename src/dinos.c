@@ -163,7 +163,7 @@ void dino_think(Entity* self, float deltaTime) {
 
     //self->position.y -= 0.01;
     /*vector3d_slog(gameManager()->player->position);*/
-    if (character->health < 0) {
+    if (character->health <= 0) {
         entity_free(self);
     }
 
