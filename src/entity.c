@@ -266,11 +266,11 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 					}
 				}
 				
-				//if (otherChar->type == char_PLAYER) {
+				if (otherChar->type == char_PLAYER) {
 					thisMob = (MOB*)thisChar->charData;
 					thisMob->reachedTarget = 1;
 					thisChar->last_CLDN1 = SDL_GetTicks();
-				//}
+				}
 
 
 				sphere_to_sphere_pushback(e1, e2);
@@ -321,7 +321,6 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 
 			if (e1->touch)
 			{
-
 				e1->touch(e1, e2);
 			}
 		}

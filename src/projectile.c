@@ -12,6 +12,7 @@ Entity* projectile_spawn(Entity* owner) {
 	vector3d_add(rayEnd, owner->position, rayScale);
 	vector3d_copy(self->position, rayEnd);
 	vector3d_copy(self->rigidbody.velocity, owner->facingDirection);
+	vector3d_copy(self->rotation, owner->rotation);
 
 	self->type = ent_PROJECTILE;
 
@@ -116,6 +117,31 @@ Entity * projectile_arrow_spawn(Entity* owner){
 	
 	Projectile* p = (Projectile*)self->entData;
 	p->power = ownerChar->power * 200;
+	p->time_to_live = 5;
+	self->entData = p;
+
+	self->touch = projectile_do_damage;
+
+	return self;
+}
+
+Entity * projectile_water_spawn(Entity* owner){
+
+	Entity* self = projectile_spawn(owner);
+	if (!self) { return; }
+
+	Character* ownerChar = (Character*)owner->entData;
+
+	self->model = gf3d_model_load("water");
+	gfc_word_cpy(self->name, "Water");
+
+	self->rigidbody.speed = 50;
+	self->rigidbody.collider_radius = .1;
+	self->touch_ground = projectile_free_onGround;
+	self->think = entity_move;
+	
+	Projectile* p = (Projectile*)self->entData;
+	p->power = ownerChar->power * 25;
 	p->time_to_live = 5;
 	self->entData = p;
 

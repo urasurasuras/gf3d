@@ -81,7 +81,8 @@ typedef struct {
 typedef enum {
 	mob_NULL,
 	mob_YELLOW,
-	mob_RED
+	mob_RED,
+	mob_BLUE
 }MobType;
 
 typedef struct {

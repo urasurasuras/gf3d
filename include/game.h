@@ -16,6 +16,7 @@
 #include "gf3d_texture.h"
 
 #include "player.h"
+#include "dinos.h"
 
 #define window_W 1600
 #define window_H 900

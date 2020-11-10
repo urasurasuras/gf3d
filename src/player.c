@@ -142,58 +142,10 @@ void entity_move(Entity * self) {
 
 }
 
-void dino_think(Entity * self, float deltaTime) {
-	Character * character = (Character*)self->entData;
 
-	Vector2D distance;
-
-	MOB* mob_data = (MOB*)character->charData;
-	Entity* target = mob_data->target;
-	distance.x = target->position.x - self->position.x;
-	distance.y = target->position.z - self->position.z;
-
-	// Set velocity vector with speed
-	self->rigidbody.velocity.x = 0;
-	//self->rigidbody.velocity.y = 0;
-	self->rigidbody.velocity.z = 0;
-
-	self->rotation.y = atan2(distance.y, distance.x);
-		/*+ M_PI*/;
-		self->facingDirection.x = cos(self->rotation.y) /** cos(self->rotation.x)*/;
-		self->facingDirection.z = sin(self->rotation.y);
-		//vector3d_slog(self->facingDirection);
-
-	self->rigidbody.velocity.x = self->facingDirection.x;
-	self->rigidbody.velocity.z = self->facingDirection.z;
-	
-
-	if (character->last_CLDN1 + character->CLDN1 < SDL_GetTicks()) {
-		mob_data->reachedTarget = 0;
-		character->last_CLDN1 = SDL_GetTicks();
-	}
-
-	if (!mob_data->reachedTarget) {
-		entity_move(self);
-	}
-	
-	//self->position.y -= 0.01;
-	/*vector3d_slog(gameManager()->player->position);*/
-	if (character->health < 0) {
-		entity_free(self);
-	}	
-
-}
 
 void entity_touch(Entity * self, Entity * other) {
 	//slog("%s colliding with %s", self->name, other->name);
-}
-void dino_touch(Entity* self, Entity* other) {
-	if (other->type == ent_CHAR) {
-		Character* c = (Character*)other->entData;
-		if (c->type == char_PLAYER) {
-			c->health -= c->power;
-		}
-	}
 }
 
 void pickup_health(Entity * self, Entity * other){

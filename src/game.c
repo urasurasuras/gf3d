@@ -20,84 +20,6 @@ void floor_rotate(Entity* self, float deltaTime) {
     }
 } 
 
-void spawn_dino_yellow_random(Model * model) {
-    // Create ent
-    Entity* dino = entity_new();
-    if (!dino)return;
-    dino->entData = malloc(sizeof(Character));
-    memset(dino->entData, 0, sizeof(Character));
-    Character* sinoData = (Character*)dino->entData;
-    dino->type = ent_CHAR;
-    gfc_word_cpy(dino->name, "Dino");
-    dino->model = gf3d_model_load("dino");
-    
-    
-    dino->position.y = 6;//height
-    dino->position.z = gfc_crandom() * gameManager()->level->bounds.d;
-    dino->position.x = gfc_crandom() * gameManager()->level->bounds.w;
-    //dino->think = floor_rotate;
-
-    dino->think = dino_think;
-    dino->touch = dino_touch;
-
-    dino->rigidbody.collider_radius = 6;
-    dino->rigidbody.gravity_scale = 1;
-    sinoData->check_for_raycast = 0;
-    dino->rigidbody.speed = 5;
-    sinoData->health = 100;
-    sinoData->power = .1;
-    sinoData->CLDN1 = 0;
-    sinoData->type = char_AI;
-    
-    dino->modelRotOffset = vector3d(-GFC_HALF_PI, -GFC_HALF_PI, 0);  
-
-    sinoData->charData = malloc(sizeof(MOB));
-    memset(sinoData->charData, 0, sizeof(Character));
-    MOB* mob_data = (MOB*)sinoData->charData;
-    mob_data->target = gameManager()->player;
-    mob_data->reachedTarget = 0;
-    mob_data->mobType = mob_YELLOW;
-    slog("Targeting %s", mob_data->target->name);
-}
-
-void spawn_dino_red_random(Model * model) {
-    // Create ent
-    Entity* dino = entity_new();
-    if (!dino)return;
-    dino->entData = malloc(sizeof(Character));
-    Character* sinoData = (Character*)dino->entData;
-    dino->type = ent_CHAR;
-    gfc_word_cpy(dino->name, "Red Dino");
-    dino->model = gf3d_model_load("dino_red");
-    
-    
-    dino->position.y = 6;//height
-    dino->position.z = gfc_crandom() * gameManager()->level->bounds.d;
-    dino->position.x = gfc_crandom() * gameManager()->level->bounds.w;
-    //dino->think = floor_rotate;
-
-    dino->think = dino_think;
-    dino->touch = dino_touch;
-
-    dino->rigidbody.collider_radius = 6;
-    dino->rigidbody.gravity_scale = 1;
-    sinoData->check_for_raycast = 0;
-    dino->rigidbody.speed = 50;
-    sinoData->health = 100;
-    sinoData->power = 50;
-    sinoData->CLDN1 = 5000;
-    sinoData->type = char_AI;
-    dino->modelRotOffset = vector3d(-GFC_HALF_PI, -GFC_HALF_PI, 0);
-    /*vector3d_slog(dino->position);*/
-
-    sinoData->charData = malloc(sizeof(MOB));
-    MOB* mob_data = (MOB*)sinoData->charData;
-    mob_data->target = gameManager()->player;
-    mob_data->reachedTarget = 0;
-    mob_data->mobType = mob_RED;
-    slog("Targeting %s", mob_data->target->name);
-}
-
 void spawn_pickup_random() {
     
     Entity* self = entity_new();
@@ -147,7 +69,7 @@ int main(int argc,char *argv[])
     int done = 0;
     int play = 0;
     int a;
-    Uint8 validate = 1;
+    Uint8 validate = 0;
     Uint32 bufferFrame = 0;
     VkCommandBuffer commandBuffer;
 
@@ -159,6 +81,9 @@ int main(int argc,char *argv[])
     
     Uint32 red_dino_spawn_cldn = 20000;
     Uint32 red_dino_spawn_last = 0;
+        
+    Uint32 blue_dino_spawn_cldn = 10000;
+    Uint32 blue_dino_spawn_last = 0;
 
     Uint32 pickup_spawn_cldn = 10000;
     Uint32 pickup_spawn_last = 0;
@@ -255,11 +180,11 @@ int main(int argc,char *argv[])
     walls->model = gf3d_model_load("walls");
     walls->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
 
-    spawn_dino_yellow_random(dinoModel);
-    spawn_dino_yellow_random(dinoModel);
-    spawn_dino_yellow_random(dinoModel);
-    spawn_dino_yellow_random(dinoModel);
-    spawn_dino_yellow_random(dinoModel);
+    //spawn_dino_yellow_random(dinoModel);
+    //spawn_dino_yellow_random(dinoModel);
+    //spawn_dino_yellow_random(dinoModel);
+    //spawn_dino_yellow_random(dinoModel);
+    //spawn_dino_yellow_random(dinoModel);
 
     // main game loop
     slog("MAIN LOOP BEGIN");
@@ -316,15 +241,19 @@ int main(int argc,char *argv[])
         
         if (yellow_dino_spawn_last + yellow_dino_spawn_cldn < SDL_GetTicks()) {
             yellow_dino_spawn_last = SDL_GetTicks();
-            spawn_dino_yellow_random(dinoModel);
+            //spawn_dino_yellow_random();
         }
         if (red_dino_spawn_last + red_dino_spawn_cldn < SDL_GetTicks()) {
             red_dino_spawn_last = SDL_GetTicks();
-            spawn_dino_red_random(dinoModel);
+            //spawn_dino_red_random();
+        }
+        if (blue_dino_spawn_last + blue_dino_spawn_cldn < SDL_GetTicks()) {
+            blue_dino_spawn_last = SDL_GetTicks();
+            spawn_dino_blue_random();
         }
         if (pickup_spawn_last + pickup_spawn_cldn < SDL_GetTicks()) {
             pickup_spawn_last = SDL_GetTicks();
-            spawn_pickup_random();
+            //spawn_pickup_random();
         }
 
 
