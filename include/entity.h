@@ -78,8 +78,16 @@ typedef struct {
 /**
  CHARACTER TYPES
 */
+typedef enum {
+	mob_NULL,
+	mob_YELLOW,
+	mob_RED
+}MobType;
+
 typedef struct {
 	Entity* target;
+	MobType mobType;
+	int reachedTarget;
 }MOB;
 
 /**

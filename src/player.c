@@ -165,8 +165,17 @@ void dino_think(Entity * self, float deltaTime) {
 
 	self->rigidbody.velocity.x = self->facingDirection.x;
 	self->rigidbody.velocity.z = self->facingDirection.z;
-	//vector3d_sub(self->rotation, gameManager()->player->position, self->position);
-	entity_move(self);
+	
+
+	if (character->last_CLDN1 + character->CLDN1 < SDL_GetTicks()) {
+		mob_data->reachedTarget = 0;
+		character->last_CLDN1 = SDL_GetTicks();
+	}
+
+	if (!mob_data->reachedTarget) {
+		entity_move(self);
+	}
+	
 	//self->position.y -= 0.01;
 	/*vector3d_slog(gameManager()->player->position);*/
 	if (character->health < 0) {
@@ -182,7 +191,7 @@ void dino_touch(Entity* self, Entity* other) {
 	if (other->type == ent_CHAR) {
 		Character* c = (Character*)other->entData;
 		if (c->type == char_PLAYER) {
-			c->health -= 0.1;
+			c->health -= c->power;
 		}
 	}
 }

@@ -137,6 +137,9 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 	Level* thisLevel;
 	Level* otherLevel;
 
+	MOB* thisMob;
+	MOB* otherMob;
+
 	Projectile* otherProjecetile;
 
 	RectPrism levelRect;
@@ -254,6 +257,22 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			// if this ent is in circle collision with the other ent
 			if (collide_sphere(e1->position, e1->rigidbody.collider_radius, e2->position, e2->rigidbody.collider_radius))
 			{// Sphere-to-sphere
+				
+				if (otherChar->type == char_AI) {
+					otherMob = (MOB*)otherChar->charData;
+					if (otherMob->mobType == mob_YELLOW) {
+						entity_free(e2);
+						break;
+					}
+				}
+				
+				//if (otherChar->type == char_PLAYER) {
+					thisMob = (MOB*)thisChar->charData;
+					thisMob->reachedTarget = 1;
+					thisChar->last_CLDN1 = SDL_GetTicks();
+				//}
+
+
 				sphere_to_sphere_pushback(e1, e2);
 
 				//slog("%s colliding with %s", e1->name, e2->name);
