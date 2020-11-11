@@ -180,11 +180,11 @@ int main(int argc,char *argv[])
     walls->model = gf3d_model_load("walls");
     walls->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
 
-    spawn_dino_yellow_random(dinoModel);
-    spawn_dino_yellow_random(dinoModel);
-    spawn_dino_yellow_random(dinoModel);
-    spawn_dino_yellow_random(dinoModel);
-    spawn_dino_yellow_random(dinoModel);
+    //spawn_dino_yellow_random(dinoModel);
+    //spawn_dino_yellow_random(dinoModel);
+    //spawn_dino_yellow_random(dinoModel);
+    //spawn_dino_yellow_random(dinoModel);
+    //spawn_dino_yellow_random(dinoModel);
 
     // main game loop
     slog("MAIN LOOP BEGIN");

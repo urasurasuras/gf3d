@@ -275,7 +275,7 @@ void gf3d_vgraphics_setup(
     {
         gf3d_vgraphics_setup_debug();
     }
-    atexit(gf3d_vgraphics_close);
+    //atexit(gf3d_vgraphics_close);
     
     //get a gpu to do work with
     vkEnumeratePhysicalDevices(gf3d_vgraphics.vk_instance, &gf3d_vgraphics.device_count, NULL);
