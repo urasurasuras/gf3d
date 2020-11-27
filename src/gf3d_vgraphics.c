@@ -60,8 +60,9 @@ typedef struct
     VkSemaphore                 imageAvailableSemaphore;
     VkSemaphore                 renderFinishedSemaphore;
         
-    Pipeline                   *pipe;
-    
+    Pipeline                   *model_pipe;     /**<for rendering 3d*/
+    Pipeline                   *overlay_pipe;   /**<for rendering 2d*/
+
     Command                 *   graphicsCommandPool; 
     UniformBufferObject         ubo;
 
@@ -139,14 +140,14 @@ void gf3d_vgraphics_init(
     gf3d_mesh_init(1024);//TODO: pull this from a parameter
     gf3d_texture_init(1024);
     gf3d_pipeline_init(4);// how many different rendering pipelines we need
-    gf3d_vgraphics.pipe = gf3d_pipeline_basic_model_create(device,"shaders/vert.spv","shaders/frag.spv",gf3d_vgraphics_get_view_extent(),1024);
+    gf3d_vgraphics.model_pipe = gf3d_pipeline_basic_model_create(device,"shaders/vert.spv","shaders/frag.spv",gf3d_vgraphics_get_view_extent(),1024);
     gf3d_model_manager_init(1024,gf3d_swapchain_get_swap_image_count(),device);
 	gf3d_command_system_init(8 * gf3d_swapchain_get_swap_image_count(), device);
 
-    gf3d_vgraphics.graphicsCommandPool = gf3d_command_graphics_pool_setup(gf3d_swapchain_get_swap_image_count(),gf3d_vgraphics.pipe);
+    gf3d_vgraphics.graphicsCommandPool = gf3d_command_graphics_pool_setup(gf3d_swapchain_get_swap_image_count(),gf3d_vgraphics.model_pipe);
 
     gf3d_swapchain_create_depth_image();
-    gf3d_swapchain_setup_frame_buffers(gf3d_vgraphics.pipe);
+    gf3d_swapchain_setup_frame_buffers(gf3d_vgraphics.model_pipe);
     gf3d_vgraphics_semaphores_create();
 }
 
@@ -697,9 +698,14 @@ void gf3d_vgraphics_update_view() {
     // Copy position
 }
 
-Pipeline *gf3d_vgraphics_get_graphics_pipeline()
+Pipeline *gf3d_vgraphics_get_models_pipeline()
 {
-    return gf3d_vgraphics.pipe;
+    return gf3d_vgraphics.model_pipe;
+}
+
+Pipeline *gf3d_vgraphics_get_overlay_pipeline()
+{
+    return gf3d_vgraphics.overlay_pipe;
 }
 
 Command *gf3d_vgraphics_get_graphics_command_pool()

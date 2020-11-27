@@ -262,7 +262,9 @@ int main(int argc,char *argv[])
         // configure render command for graphics command pool
         // for each mesh, get a command and configure it from the pool
         bufferFrame = gf3d_vgraphics_render_begin();
-        gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_pipeline(),bufferFrame);
+        gf3d_pipeline_reset_frame(gf3d_vgraphics_get_models_pipeline(),bufferFrame);
+        //gf3d_pipeline_reset_frame(gf3d_vgraphics_get_graphics_overlay_pipeline(),bufferFrame);
+
             commandBuffer = gf3d_command_rendering_begin(bufferFrame);
 
             entity_think_all(gameManager()->deltaTime);
@@ -271,6 +273,16 @@ int main(int argc,char *argv[])
 
             gf3d_command_rendering_end(commandBuffer);
             
+
+            // 2D overlay rendering
+            // commandBuffer = gf3d_command_rendering_begin(bufferFrame,gf3d_vgraphics_get_graphics_overlay_pipeline());
+
+            //     gf3d_sprite_draw(hud,vector2d(0,0),vector2d(2,2),0, bufferFrame,commandBuffer);
+            //     gf3d_sprite_draw(mouse,vector2d(mousex,mousey),vector2d(1,1),mouseFrame, bufferFrame,commandBuffer);
+                
+            // gf3d_command_rendering_end(commandBuffer);
+
+
         gf3d_vgraphics_render_end(bufferFrame);
 
         play = 1; // start game after we are done with the first game loop

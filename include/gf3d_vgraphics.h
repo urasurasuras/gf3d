@@ -49,7 +49,8 @@ SDL_Window* gf3d_vgraphics_get_SDL_Window();
 VkBuffer gf3d_vgraphics_get_uniform_buffer_by_index(Uint32 index);
 UniformBufferObject gf3d_vgraphics_get_uniform_buffer_object();
 
-Pipeline *gf3d_vgraphics_get_graphics_pipeline();
+Pipeline *gf3d_vgraphics_get_models_pipeline();
+Pipeline *gf3d_vgraphics_get_overlay_pipeline();
 
 Command *gf3d_vgraphics_get_graphics_command_pool();
 
