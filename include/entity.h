@@ -64,7 +64,7 @@ typedef struct Entity_S {
 	Rigidbody rigidbody;
 
 	// Update
-	void (*think)(struct Entity_S* self, float deltaTime);
+	void (*think)(struct Entity_S* self);
 	void (*touch)(struct Entity_S* self, struct Entity_S* other);
 	void (*touch_ground)(struct Entity_S* self);
 
@@ -119,7 +119,7 @@ typedef struct {
 
 	float power;
 
-	void (*primaryAttack)(struct Entity_S* self);
+	void (*primaryAttack)(Entity* self);
 
 }Character;
 

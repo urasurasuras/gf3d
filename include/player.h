@@ -5,8 +5,7 @@
 #include "entity.h"
 #include "projectile.h"
 
-void player_think(Entity* self, float deltaTime);
-void dino_think(Entity* self, float deltaTime);
+void player_think(Entity* self);
 
 void entity_move(Entity* self);
 void entity_touch(Entity* self, Entity* other);

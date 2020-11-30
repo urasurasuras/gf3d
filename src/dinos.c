@@ -116,7 +116,9 @@ void spawn_dino_blue_random() {
     slog("Targeting %s", mob_data->target->name);
 }
 
-void dino_think(Entity* self, float deltaTime) {
+void dino_think(Entity* self) {
+    //float deltaTime =  gameManager()->deltaTime;
+
     Character* character = (Character*)self->entData;
 
     Vector2D distance;

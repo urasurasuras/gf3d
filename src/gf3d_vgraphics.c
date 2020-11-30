@@ -167,7 +167,7 @@ void gf3d_vgraphics_setup(
     Uint32 enabledExtensionCount = 0;
     VkDeviceCreateInfo createInfo = {0};
 
-    char*   testList;
+    //char*   testList;
     
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
@@ -686,13 +686,13 @@ void gf3d_vgraphics_rotate_camera(Vector3D axis, float degrees)
 }
 
 void gf3d_vgraphics_update_view() {
-    Matrix4 cam, ubo;
-    gfc_matrix_copy(cam, gf3d_get_cam()->view);
-    gfc_matrix_copy(ubo, gf3d_vgraphics.ubo.view);
+    //Matrix4 cam, ubo;
+    //gfc_matrix_copy(cam, gf3d_get_cam()->view);
+    //gfc_matrix_copy(ubo, gf3d_vgraphics.ubo.view);
     //gfc_matrix_slog(ubo);
     // Copy rotation
-    Matrix4 * uboView;
-    uboView = gf3d_vgraphics.ubo.view;
+    //Matrix4 * uboView;
+    //uboView = gf3d_vgraphics.ubo.view;
 
     //uboView[0][0] = gf3d_get_cam()->view[0][0];
     gfc_matrix_copy(gf3d_vgraphics.ubo.view, gf3d_get_cam()->view);
@@ -720,7 +720,7 @@ UniformBufferObject gf3d_vgraphics_get_uniform_buffer_object()
 }
 
 SDL_Window * gf3d_vgraphics_get_SDL_Window() {
-    return &gf3d_vgraphics.main_window;
+    return gf3d_vgraphics.main_window;
 }
 
 VkImageView gf3d_vgraphics_create_image_view(VkImage image, VkFormat format)

@@ -35,14 +35,14 @@ void gf3d_validation_query_layer_properties()
     gf3d_validation.layerNames = (const char* * )gfc_allocate_array(sizeof(const char *),gf3d_validation.layerCount);
     for (i = 0; i < gf3d_validation.layerCount;i++)
     {
-        const char* const list = gf3d_validation.availableLayers[i].layerName;
+        //const char* const list = gf3d_validation.availableLayers[i].layerName;
 
-        //if (strcmp(gf3d_validation.availableLayers[i].layerName, "VK_LAYER_LUNARG_api_dump") == 0) {
-        //    //gf3d_validation.layerCount--;
-        //    //i--;
-        //    continue;
-        //}
-        gf3d_validation.layerNames[i] = (const char *)gf3d_validation.availableLayers[i].layerName;
+        if (strcmp(gf3d_validation.availableLayers[i].layerName, "VK_LAYER_LUNARG_api_dump") == 0) {
+           gf3d_validation.layerCount--;
+           i--;
+           continue;
+        }
+        //gf3d_validation.layerNames[i] = (const char *)gf3d_validation.availableLayers[i].layerName;
         slog("Validation layer available: %s",gf3d_validation.availableLayers[i].layerName);
     }
 }

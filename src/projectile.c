@@ -3,7 +3,12 @@
 
 Entity* projectile_spawn(Entity* owner) {
 	Entity* self = entity_new();
-	if (!self) { return; }
+
+	if (!self) { 
+		
+		slog("Returned NULL projectile");
+		return NULL; 
+	}
 
 	Vector3D rayScale;
 	Vector3D rayEnd;
@@ -25,7 +30,7 @@ Entity* projectile_spawn(Entity* owner) {
 	return self;
 }
 
-Entity * projectile_beachball_spawn(Entity* owner){
+void projectile_beachball_spawn(Entity* owner){
 
 	Entity* self = projectile_spawn(owner);
 	if (!self) { return; }
@@ -47,10 +52,10 @@ Entity * projectile_beachball_spawn(Entity* owner){
 
 	self->touch = projectile_do_damage;
 	
-	return self;
+	//return self;
 }
 
-Entity * projectile_monkeybomb_spawn(Entity* owner){
+void projectile_monkeybomb_spawn(Entity* owner){
 
 	Entity* self = projectile_spawn(owner);
 	if (!self) { return; }
@@ -97,10 +102,10 @@ Entity * projectile_monkeybomb_spawn(Entity* owner){
 		}
 	}
 
-	return self;
+	//return self;
 }
 
-Entity * projectile_arrow_spawn(Entity* owner){
+void projectile_arrow_spawn(Entity* owner){
 
 	Entity* self = projectile_spawn(owner);
 	if (!self) { return; }
@@ -122,10 +127,10 @@ Entity * projectile_arrow_spawn(Entity* owner){
 
 	self->touch = projectile_do_damage;
 
-	return self;
+	//return self;
 }
 
-Entity * projectile_water_spawn(Entity* owner){
+void projectile_water_spawn(Entity* owner){
 
 	Entity* self = projectile_spawn(owner);
 	if (!self) { return; }
@@ -147,7 +152,7 @@ Entity * projectile_water_spawn(Entity* owner){
 
 	self->touch = projectile_do_damage;
 
-	return self;
+	//return self;
 }
 
 void projectile_do_damage(Entity* self, Entity* other) {

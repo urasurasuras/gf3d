@@ -2,6 +2,8 @@
 #include "gfc_matrix.h"
 #include "gfc_types.h"
 
+static GameManager game_manager = { 0 };
+
 void floor_rotate(Entity* self, float deltaTime) {
     if (keys[SDL_SCANCODE_Q]) {
         self->rotation.x += (deltaTime);
@@ -73,7 +75,7 @@ int main(int argc,char *argv[])
     Uint32 bufferFrame = 0;
     VkCommandBuffer commandBuffer;
 
-    Sprite *hud = NULL;
+    Sprite *hud;
 
     Uint32 LAST =0;
     Uint32 NOW =0;
@@ -114,12 +116,21 @@ int main(int argc,char *argv[])
 	slog_sync();
 
     entity_init(128);
-    Model* dinoModel = gf3d_model_load("dino");
+
+    // Load all models once
+    gf3d_model_load("dino");
+    gf3d_model_load("dino_blue");
+    gf3d_model_load("dino_red");
+
+    gf3d_model_load("pickup_health");
+    gf3d_model_load("pickup_damage");
+    gf3d_model_load("pickup_speed");
+    gf3d_model_load("pickup_kaboom");
+    /**/
 
     gameManager()->lastMx = 0;
     gameManager()->lastMy = 0;
     gameManager()->deltaTime = 0;
-    Matrix4 camMatrix;
 
     // Create PLAYER
     Entity* player = entity_new();
@@ -218,7 +229,7 @@ int main(int argc,char *argv[])
         }
 
         gf3d_camera_FPS_rotation(
-            gf3d_get_cam(),
+            gf3d_get_cam()->view,
             player->position,
             gf3d_get_cam()->rotation.x,
             -gf3d_get_cam()->rotation.y
@@ -243,19 +254,19 @@ int main(int argc,char *argv[])
         
         if (yellow_dino_spawn_last + yellow_dino_spawn_cldn < SDL_GetTicks()) {
             yellow_dino_spawn_last = SDL_GetTicks();
-            spawn_dino_yellow_random();
+            //spawn_dino_yellow_random();
         }
         if (red_dino_spawn_last + red_dino_spawn_cldn < SDL_GetTicks()) {
             red_dino_spawn_last = SDL_GetTicks();
-            spawn_dino_red_random();
+            //spawn_dino_red_random();
         }
         if (blue_dino_spawn_last + blue_dino_spawn_cldn < SDL_GetTicks()) {
             blue_dino_spawn_last = SDL_GetTicks();
-            spawn_dino_blue_random();
+            //spawn_dino_blue_random();
         }
         if (pickup_spawn_last + pickup_spawn_cldn < SDL_GetTicks()) {
             pickup_spawn_last = SDL_GetTicks();
-            spawn_pickup_random();
+            //spawn_pickup_random();
         }
 
 
@@ -268,6 +279,8 @@ int main(int argc,char *argv[])
         // configure render command for graphics command pool
         // for each mesh, get a command and configure it from the pool
         bufferFrame = gf3d_vgraphics_render_begin();
+
+        //slog("Buffer frame: %d", bufferFrame);
         gf3d_pipeline_reset_frame(gf3d_vgraphics_get_models_pipeline(),bufferFrame);
         gf3d_pipeline_reset_frame(gf3d_vgraphics_get_overlay_pipeline(),bufferFrame);
 
@@ -277,11 +290,10 @@ int main(int argc,char *argv[])
 
             gf3d_command_rendering_end(commandBuffer);
             
-
             // 2D overlay rendering
             commandBuffer = gf3d_command_rendering_begin(bufferFrame,gf3d_vgraphics_get_overlay_pipeline());
 
-                gf3d_sprite_draw(hud,vector2d(500,500),vector2d(1,1),0, bufferFrame,commandBuffer);
+                gf3d_sprite_draw(hud,vector2d(50,50),vector2d(1,1),0, bufferFrame,commandBuffer);
                 // gf3d_sprite_draw(mouse,vector2d(mousex,mousey),vector2d(1,1),mouseFrame, bufferFrame,commandBuffer);
                 
             gf3d_command_rendering_end(commandBuffer);
@@ -291,7 +303,7 @@ int main(int argc,char *argv[])
 
         //play = 1; // start game after we are done with the first game loop
         if (playerData->health <= 0) { 
-            done = 1; 
+            //done = 1; 
             slog("Player health %.2f", playerData->health); 
         }
         if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition

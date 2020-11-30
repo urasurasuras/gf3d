@@ -37,7 +37,6 @@ typedef struct GameManager_S {
 
 const Uint8* keys;
 
-static GameManager game_manager = { 0 };
 
 GameManager* gameManager();
 //Level* level();

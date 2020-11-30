@@ -16,7 +16,9 @@ void player_projectile_arrow_attack(Entity* self) {
 
 	projectile_arrow_spawn(self);
 }
-void player_think(Entity* self, float deltaTime) {	
+void player_think(Entity* self) {	
+	float deltaTime =  gameManager()->deltaTime;
+
 	Character* character = (Character*)self->entData;
 
 	// Set facing direction to rotation
@@ -133,12 +135,12 @@ void player_think(Entity* self, float deltaTime) {
 }
 
 void entity_move(Entity * self) {
-	Character * character = self->entData;
+	float deltaTime =  gameManager()->deltaTime;
 
 	// Increment position from velocity
-	self->position.x += (self->rigidbody.velocity.x * self->rigidbody.speed * gameManager()->deltaTime);
-	self->position.y += (self->rigidbody.velocity.y * self->rigidbody.speed * gameManager()->deltaTime);
-	self->position.z += (self->rigidbody.velocity.z * self->rigidbody.speed * gameManager()->deltaTime);
+	self->position.x += (self->rigidbody.velocity.x * self->rigidbody.speed * deltaTime);
+	self->position.y += (self->rigidbody.velocity.y * self->rigidbody.speed * deltaTime);
+	self->position.z += (self->rigidbody.velocity.z * self->rigidbody.speed * deltaTime);
 
 }
 

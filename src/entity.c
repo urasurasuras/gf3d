@@ -124,7 +124,7 @@ void entity_think_all(float deltaTime) {
 			//vector3d_slog(entity_manager.entity_list[i].rigidbody.velocity);
 		}
 		if (entity_manager.entity_list[i].think) {
-			entity_manager.entity_list[i].think(&entity_manager.entity_list[i], deltaTime);
+			entity_manager.entity_list[i].think(&entity_manager.entity_list[i]);
 		}
 		entity_collision_check(&entity_manager.entity_list[i]);
 	}
