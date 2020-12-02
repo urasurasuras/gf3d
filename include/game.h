@@ -18,6 +18,7 @@
 
 #include "player.h"
 #include "dinos.h"
+#include "gf3d_camera.h"
 
 #define window_W 1600
 #define window_H 900
@@ -27,7 +28,7 @@
 typedef struct GameManager_S {
 	Entity * player;
 	Level * level;
-	
+	Camera * gf3d_camera;
 
 	Uint32 lastUpdate;
 	float deltaTime;

@@ -77,6 +77,7 @@ int main(int argc,char *argv[])
 
     Character * player_data = NULL;
     Entity * player = NULL;
+    //Camera * gf3d_camera = NULL;
 
     Sprite *hud;
 
@@ -131,12 +132,14 @@ int main(int argc,char *argv[])
     // gf3d_model_load("pickup_kaboom");
     /**/
 
-    gameManager()->lastMx = 0;
-    gameManager()->lastMy = 0;
-    gameManager()->deltaTime = 0;
+    // Init Game Manager
+    game_manager.lastMx = 0;
+    game_manager.lastMy = 0;
+    game_manager.deltaTime = 0;
+    game_manager.gf3d_camera = gf3d_get_cam();
 
     // Create PLAYER
-    gameManager()->player = player_spawn();
+    game_manager.player = player_spawn();
     player_data = (Character*)game_manager.player->entData;
     player = game_manager.player;
    
@@ -186,8 +189,8 @@ int main(int argc,char *argv[])
         player->rotation.x -= (game_manager.my - half_h) * 0.001;// V look (pitch)
         player->rotation.y += (game_manager.mx - half_w) * 0.001;// H look (yaw)
 
-        gf3d_get_cam()->rotation.x = player->rotation.x;
-        gf3d_get_cam()->rotation.y = player->rotation.y;
+        game_manager.gf3d_camera->rotation.x = player->rotation.x;
+        game_manager.gf3d_camera->rotation.y = player->rotation.y;
 
         // Clamp rotation
         if (player->rotation.x > 1.5) {
@@ -198,16 +201,16 @@ int main(int argc,char *argv[])
         }
 
         gf3d_camera_FPS_rotation(
-            gf3d_get_cam()->view,
+            game_manager.gf3d_camera->view,
             player->position,
-            gf3d_get_cam()->rotation.x,
-            -gf3d_get_cam()->rotation.y
+            game_manager.gf3d_camera->rotation.x,
+            -game_manager.gf3d_camera->rotation.y
         );
 
         LAST = NOW;
         NOW = SDL_GetTicks();
 
-        gameManager()->deltaTime = ((float)(NOW - LAST) / 1000);
+        game_manager.deltaTime = ((float)(NOW - LAST) / 1000);
         /*
 
         LAST = NOW;
