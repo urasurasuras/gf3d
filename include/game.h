@@ -27,6 +27,7 @@
 typedef struct GameManager_S {
 	Entity * player;
 	Level * level;
+	
 
 	Uint32 lastUpdate;
 	float deltaTime;

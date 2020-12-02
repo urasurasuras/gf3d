@@ -1,6 +1,44 @@
 #include "player.h"
 #include "simple_logger.h"
 
+Entity * player_spawn(){
+	Entity* player = entity_new();
+    player->entData = malloc(sizeof(Character));
+    Character* playerData = (Character*)player->entData;
+    gfc_word_cpy(player->name, "Player");
+    gf3d_get_cam()->player = player;
+    player->think = player_think;
+    //player->think = floor_rotate;
+    player->type = ent_CHAR;
+    player->rigidbody.speed = 20;
+    player->position.x = 5;
+    player->position.y = 5;
+    player->position.z = 5;
+    player->touch = entity_touch;
+    player->rigidbody.collider_radius = 4;
+    player->rigidbody.gravity_scale = .5;
+    playerData->check_for_raycast = 0;
+    playerData->CLDN1 = 1000;
+    playerData->last_CLDN1 = 0;
+    playerData->CLDN2 = 100;
+    playerData->last_CLDN2 = 0;
+    playerData->CLDN3 = 2000;
+    playerData->last_CLDN3 = 0;
+
+    playerData->power = 1;
+
+    playerData->primaryAttack = player_hitscan_attack;
+
+    playerData->health = 100;
+
+    playerData->speed_buff = 1;
+    //player->model = gf3d_model_load("USP45");
+    playerData->type = char_PLAYER;
+    player->modelPosOffset = vector3d(0, 0, 10);
+    player->modelRotOffset = vector3d(GFC_HALF_PI, 0, GFC_HALF_PI);
+
+	return player;
+}
 void player_hitscan_attack(Entity* self) {
 	Character* character = (Character*)self->entData;
 	character->check_for_raycast = 1;

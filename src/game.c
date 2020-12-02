@@ -25,17 +25,19 @@ void floor_rotate(Entity* self, float deltaTime) {
 void spawn_pickup_random() {
     
     Entity* self = entity_new();
-    if (!self)return;
+    if (!self){
+        slog("NULL entity pickup");
+        return;
+    }
 
     self->type = ent_PICKUP;
     gfc_word_cpy(self->name, "Pickup");
     self->rigidbody.collider_radius = 4;
     self->think = sine_movement;
-
     self->position.z = gfc_crandom() * gameManager()->level->bounds.d;
     self->position.x = gfc_crandom() * gameManager()->level->bounds.w;
     int index = FLOAT_TO_INT(gfc_random() * 3.5);
-    //slog("%d", index);
+
     switch (index)
     {
     case 0:
@@ -60,8 +62,6 @@ void spawn_pickup_random() {
     default:
         break;
     }
-    //self->model
-
 
 }
 
@@ -74,6 +74,9 @@ int main(int argc,char *argv[])
     Uint8 validate = 0;
     Uint32 bufferFrame = 0;
     VkCommandBuffer commandBuffer;
+
+    Character * player_data = NULL;
+    Entity * player = NULL;
 
     Sprite *hud;
 
@@ -133,43 +136,9 @@ int main(int argc,char *argv[])
     gameManager()->deltaTime = 0;
 
     // Create PLAYER
-    Entity* player = entity_new();
-    player->entData = malloc(sizeof(Character));
-    Character* playerData = (Character*)player->entData;
-    gfc_word_cpy(player->name, "Player");
-    gf3d_get_cam()->player = player;
-    player->think = player_think;
-    //player->think = floor_rotate;
-    player->type = ent_CHAR;
-    player->rigidbody.speed = 20;
-    player->position.x = 5;
-    player->position.y = 5;
-    player->position.z = 5;
-    player->touch = entity_touch;
-    player->rigidbody.collider_radius = 4;
-    player->rigidbody.gravity_scale = .5;
-    playerData->check_for_raycast = 0;
-    playerData->CLDN1 = 1000;
-    playerData->last_CLDN1 = 0;
-    playerData->CLDN2 = 100;
-    playerData->last_CLDN2 = 0;
-    playerData->CLDN3 = 2000;
-    playerData->last_CLDN3 = 0;
-
-    playerData->power = 1;
-
-    playerData->primaryAttack = player_hitscan_attack;
-
-    playerData->health = 100;
-
-    playerData->speed_buff = 1;
-    //player->model = gf3d_model_load("USP45");
-    playerData->type = char_PLAYER;
-    player->modelPosOffset = vector3d(0, 0, 10);
-    player->modelRotOffset = vector3d(GFC_HALF_PI, 0, GFC_HALF_PI);
-
-    gameManager()->player = player;
-
+    gameManager()->player = player_spawn();
+    player_data = (Character*)game_manager.player->entData;
+    player = game_manager.player;
    
     // Create FLOOR
     Entity* floor = entity_new();
@@ -209,13 +178,13 @@ int main(int argc,char *argv[])
         SDL_PumpEvents();   // update SDL's internal event structures
         keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
         //SDL_GetRelativeMouseState(&lastMx, &lastMy);
-        SDL_GetMouseState(&gameManager()->mx, &gameManager()->my);
+        SDL_GetMouseState(&game_manager.mx, &game_manager.my);
 
         //update game things here
         //slog("deltaTime: %f", gameManager()->deltaTime);
         // Get mouse input delta
-        player->rotation.x -= (gameManager()->my - half_h) * 0.001;// V look (pitch)
-        player->rotation.y += (gameManager()->mx - half_w) * 0.001;// H look (yaw)
+        player->rotation.x -= (game_manager.my - half_h) * 0.001;// V look (pitch)
+        player->rotation.y += (game_manager.mx - half_w) * 0.001;// H look (yaw)
 
         gf3d_get_cam()->rotation.x = player->rotation.x;
         gf3d_get_cam()->rotation.y = player->rotation.y;
@@ -234,8 +203,6 @@ int main(int argc,char *argv[])
             gf3d_get_cam()->rotation.x,
             -gf3d_get_cam()->rotation.y
         );
-
-
 
         LAST = NOW;
         NOW = SDL_GetTicks();
@@ -302,9 +269,9 @@ int main(int argc,char *argv[])
         gf3d_vgraphics_render_end(bufferFrame);
 
         //play = 1; // start game after we are done with the first game loop
-        if (playerData->health <= 0) { 
+        if (player_data->health <= 0) { 
             //done = 1; 
-            slog("Player health %.2f", playerData->health); 
+            slog("Player health %.2f", player_data->health); 
         }
         if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
     }    

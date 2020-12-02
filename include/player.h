@@ -5,6 +5,8 @@
 #include "entity.h"
 #include "projectile.h"
 
+Entity * player_spawn();
+
 void player_think(Entity* self);
 
 void entity_move(Entity* self);
