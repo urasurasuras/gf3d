@@ -63,9 +63,14 @@ Entity* entity_new() {
 }
 
 void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
-	if (!self)return;
-	if (!self->model)return;
-
+	if (!self){
+		slog("Cannot draw null ent");
+		return;
+		}
+	if (!self->model){
+		slog("Cannot draw null model of %s", self->name);
+		return;
+	}
 	Vector3D drawPos;
 
 
@@ -131,7 +136,10 @@ void entity_think_all(float deltaTime) {
 }
 
 void entity_entity_collide(Entity* e1, Entity* e2) {
-	if (!(e1 || e2))return;
+	if (	(!e1) || (!e2)	){
+		slog("Invalid entity pointers for collision calculation");
+		return;
+	}
 	Character* thisChar;
 	Character* otherChar;
 
@@ -186,10 +194,9 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			// If projectile hits the ground, execute their respective function
 			if (e2->position.y - e2->rigidbody.collider_radius < levelRect.y) {
 				otherProjecetile = (Projectile*)e2->entData;
-				if (!e2) {
-					break;
-				}
+
 				if (!e2->touch_ground) {
+					slog("%s has no touch ground function", e2->name);
 					break;
 				}
 				e2->touch_ground(e2);
@@ -226,11 +233,19 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 	case ent_CHAR:
 
 		thisChar = (Character*)e1->entData;
+		if (!thisChar) {
+			slog("%s has no char data", e1->name);
+			break;
+		}
 
 		switch (e2->type)
 		{
 		case ent_LEVEL:
 			otherLevel = (Level*)e2->entData;
+			if (!otherLevel) {
+				slog("otherlevel is NULL");
+				break;
+			}
 			levelRect = otherLevel->bounds;
 			//e1->position.y -= gameManager()->deltaTime * GRAVITATIONAL_ACCELERATION;
 
@@ -239,10 +254,6 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 
 			otherChar = (Character*)e2->entData;
 
-			if (!thisChar) {
-				slog("%s is not a character! (has null data pointer)", e1->name);
-				break;
-			}
 			if (!otherChar) {
 				slog("%s is not a character! (has null data pointer)", e2->name);
 				break;
@@ -252,8 +263,17 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 			if (collide_sphere(e1->position, e1->rigidbody.collider_radius, e2->position, e2->rigidbody.collider_radius))
 			{// Sphere-to-sphere
 				
+				if(!otherChar){
+					slog("%s has no char data", e2->name);
+					break;
+				}
 				if (otherChar->type == char_AI && thisChar->type == char_AI) {
 					otherMob = (MOB*)otherChar->charData;
+
+					if(!otherMob){
+						slog("%s has null mob data", e2->name);
+						break;
+					}
 					if (otherMob->mobType == mob_YELLOW) {
 						entity_free(e2);
 						break;
@@ -262,6 +282,10 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 				
 				if (otherChar->type == char_PLAYER) {
 					thisMob = (MOB*)thisChar->charData;
+					if(!thisMob){
+						slog("%s has no mob data", e1->name);
+						break;
+					}
 					thisMob->reachedTarget = 1;
 					thisChar->last_CLDN1 = SDL_GetTicks();
 				}
@@ -271,10 +295,13 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 
 				//slog("%s colliding with %s", e1->name, e2->name);
 
-				if (e1->touch)
+				if (!e1->touch)
 				{
-					e1->touch(e1, e2);
+					slog("%s has no touch function");
+					break;
 				}
+				e1->touch(e1, e2);
+
 			}
 
 			if (thisChar->check_for_raycast) {// If this entity is meant to raycast
@@ -313,17 +340,22 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 		if (collide_sphere(e1->position, e1->rigidbody.collider_radius, e2->position, e2->rigidbody.collider_radius))
 		{// Sphere-to-sphere
 
-			if (e1->touch)
+			if (!e1->touch)
 			{
-				e1->touch(e1, e2);
+				slog("%s has no touch function");
+				break;
 			}
+			e1->touch(e1, e2);
 		}
 		break;
 
 	case ent_PICKUP:
 
 		otherChar = (Character*)e2->entData;
-		if (!otherChar)break;
+		if(!otherChar){
+			slog("%s has no char data", e2->name);
+			break;
+		}
 
 		if (otherChar->type != char_PLAYER)break;
 
@@ -331,10 +363,12 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 		if (collide_sphere(e1->position, e1->rigidbody.collider_radius, e2->position, e2->rigidbody.collider_radius))
 		{// Sphere-to-sphere
 
-			if (e1->touch)
+			if (!e1->touch)
 			{
-				e1->touch(e1, e2);
+				slog("%s has no touch function");
+				break;
 			}
+			e1->touch(e1, e2);
 		}
 		break;
 
@@ -362,6 +396,11 @@ void entity_collision_check(Entity* entity)
 }
 
 void sphere_to_sphere_pushback(Entity * e1,Entity * e2 ) {
+
+	if (	(!e1) || (!e2)	){
+		slog("Invalid entity pointers for collision pushback");
+		return;
+	}
 
 	float diffX = e1->position.x - e2->position.x;
 	float diffY = e1->position.y - e2->position.y;

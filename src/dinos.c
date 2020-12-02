@@ -290,7 +290,7 @@ void dino_think(Entity* self) {
     if (char_data->health <= 0) {
         entity_free(self);
     }
-    slog("DINO THINK");
+    //slog("DINO THINK");
 }
 void dino_touch(Entity* self, Entity* other) {
 
