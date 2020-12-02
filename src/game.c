@@ -118,14 +118,14 @@ int main(int argc,char *argv[])
     entity_init(128);
 
     // Load all models once
-    gf3d_model_load("dino");
-    gf3d_model_load("dino_blue");
-    gf3d_model_load("dino_red");
+    // gf3d_model_load("dino");
+    // gf3d_model_load("dino_blue");
+    // gf3d_model_load("dino_red");
 
-    gf3d_model_load("pickup_health");
-    gf3d_model_load("pickup_damage");
-    gf3d_model_load("pickup_speed");
-    gf3d_model_load("pickup_kaboom");
+    // gf3d_model_load("pickup_health");
+    // gf3d_model_load("pickup_damage");
+    // gf3d_model_load("pickup_speed");
+    // gf3d_model_load("pickup_kaboom");
     /**/
 
     gameManager()->lastMx = 0;
@@ -193,12 +193,12 @@ int main(int argc,char *argv[])
     walls->model = gf3d_model_load("walls");
     walls->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
 
-    //spawn_dino_yellow_random(dinoModel);
-    //spawn_dino_yellow_random(dinoModel);
-    //spawn_dino_yellow_random(dinoModel);
-    //spawn_dino_yellow_random(dinoModel);
-    //spawn_dino_yellow_random(dinoModel);
-    hud = gf3d_sprite_load("images/cube.png",-1,-1,0);
+    // spawn_dino_yellow_random();
+    // spawn_dino_yellow_random();
+    // spawn_dino_yellow_random();
+    // spawn_dino_yellow_random();
+    // spawn_dino_yellow_random();
+    hud = gf3d_sprite_load("images/hud.png",-1,-1,0);
 
     // main game loop
     slog("MAIN LOOP BEGIN");
@@ -254,7 +254,7 @@ int main(int argc,char *argv[])
         
         if (yellow_dino_spawn_last + yellow_dino_spawn_cldn < SDL_GetTicks()) {
             yellow_dino_spawn_last = SDL_GetTicks();
-            //spawn_dino_yellow_random();
+            spawn_dino_yellow_random();
         }
         if (red_dino_spawn_last + red_dino_spawn_cldn < SDL_GetTicks()) {
             red_dino_spawn_last = SDL_GetTicks();
@@ -293,7 +293,7 @@ int main(int argc,char *argv[])
             // 2D overlay rendering
             commandBuffer = gf3d_command_rendering_begin(bufferFrame,gf3d_vgraphics_get_overlay_pipeline());
 
-                gf3d_sprite_draw(hud,vector2d(50,50),vector2d(1,1),0, bufferFrame,commandBuffer);
+                gf3d_sprite_draw(hud,vector2d(0,0),vector2d(2,2),0, bufferFrame,commandBuffer);
                 // gf3d_sprite_draw(mouse,vector2d(mousex,mousey),vector2d(1,1),mouseFrame, bufferFrame,commandBuffer);
                 
             gf3d_command_rendering_end(commandBuffer);

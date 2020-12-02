@@ -243,13 +243,7 @@ void gf3d_vgraphics_setup(
         gf3d_vgraphics.enableValidationLayers = true;
         gf3d_validation_init();
         gf3d_vgraphics.vk_instance_info.enabledLayerCount = gf3d_validation_get_validation_layer_count();
-        //gf3d_vgraphics.vk_instance_info.enabledLayerCount = 9;
         gf3d_vgraphics.vk_instance_info.ppEnabledLayerNames = gf3d_validation_get_validation_layer_names();
-        //testList = gf3d_validation_get_validation_layer_names()[11];
-        //gf3d_vgraphics.vk_instance_info.ppEnabledLayerNames = testList;
-
-
-        //slog("layer: &s", testList);
         gf3d_extensions_enable(ET_Instance,"VK_EXT_debug_utils");
     }
     else
