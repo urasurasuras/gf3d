@@ -2,11 +2,25 @@
 #include "simple_logger.h"
 
 Entity * player_spawn(){
+
+	Character* player_data = NULL;
+
 	Entity* player = entity_new();
-    player->entData = malloc(sizeof(Character));
-    Character* playerData = (Character*)player->entData;
+	if(!player){
+		slog("Could not get new ent for player");
+		return NULL;
+	}
+
+	player_data = malloc(sizeof(Character));
+	if(!player_data){
+		slog("Player data could not be allocated");
+		return player;
+	}
+
     gfc_word_cpy(player->name, "Player");
     gf3d_get_cam()->player = player;
+	player->modelPosOffset = vector3d(0, 0, 10);
+    player->modelRotOffset = vector3d(GFC_HALF_PI, 0, GFC_HALF_PI);
     player->think = player_think;
     //player->think = floor_rotate;
     player->type = ent_CHAR;
@@ -17,30 +31,41 @@ Entity * player_spawn(){
     player->touch = entity_touch;
     player->rigidbody.collider_radius = 4;
     player->rigidbody.gravity_scale = .5;
-    playerData->check_for_raycast = 0;
-    playerData->CLDN1 = 1000;
-    playerData->last_CLDN1 = 0;
-    playerData->CLDN2 = 100;
-    playerData->last_CLDN2 = 0;
-    playerData->CLDN3 = 2000;
-    playerData->last_CLDN3 = 0;
 
-    playerData->power = 1;
-
-    playerData->primaryAttack = player_hitscan_attack;
-
-    playerData->health = 100;
-
-    playerData->speed_buff = 1;
+    player_data->check_for_raycast = 0;
+    player_data->CLDN1 = 1000;
+    player_data->last_CLDN1 = 0;
+    player_data->CLDN2 = 100;
+    player_data->last_CLDN2 = 0;
+    player_data->CLDN3 = 2000;
+    player_data->last_CLDN3 = 0;
+    player_data->power = 1;
+    player_data->primaryAttack = player_hitscan_attack;
+    player_data->health = 100;
+    player_data->speed_buff = 1;
     //player->model = gf3d_model_load("USP45");
-    playerData->type = char_PLAYER;
-    player->modelPosOffset = vector3d(0, 0, 10);
-    player->modelRotOffset = vector3d(GFC_HALF_PI, 0, GFC_HALF_PI);
+    player_data->type = char_PLAYER;
+	
+	player->entData = player_data;
 
 	return player;
 }
+
 void player_hitscan_attack(Entity* self) {
-	Character* character = (Character*)self->entData;
+
+	Character* character = NULL;
+
+	if (!self){
+		slog("NULL attacker provided");
+		return;
+	}
+
+	character = (Character*)self->entData;
+	if (!character){
+		slog("No character data provided for %s", self->name);
+		return;
+	}
+
 	character->check_for_raycast = 1;
 	self->rotation.x += gfc_random() * .02;
 	self->rotation.y += gfc_crandom() * .01;
@@ -48,16 +73,37 @@ void player_hitscan_attack(Entity* self) {
 }
 void player_projectile_attack(Entity* self) {
 
+	if (!self){
+		slog("NULL self");
+		return;
+	}
+	
 	projectile_beachball_spawn(self);
 }
 void player_projectile_arrow_attack(Entity* self) {
 
+	if (!self){
+		slog("NULL self");
+		return;
+	}
+	
 	projectile_arrow_spawn(self);
 }
+
 void player_think(Entity* self) {	
+
+	if (!self){
+		slog("NULL self");
+		return;
+	}
+	
 	float deltaTime =  gameManager()->deltaTime;
 
 	Character* character = (Character*)self->entData;
+	if (!character){
+		slog("No character data provided for %s", self->name);
+		return;
+	}
 
 	// Set facing direction to rotation
 	self->facingDirection.x = cos(self->rotation.y) /** cos(self->rotation.x)*/;
@@ -173,6 +219,12 @@ void player_think(Entity* self) {
 }
 
 void entity_move(Entity * self) {
+
+	if (!self){
+		slog("NULL self");
+		return;
+	}
+	
 	float deltaTime =  gameManager()->deltaTime;
 
 	// Increment position from velocity
@@ -183,14 +235,39 @@ void entity_move(Entity * self) {
 }
 
 
-
 void entity_touch(Entity * self, Entity * other) {
+
+	if (!self){
+		slog("NULL self");
+		return;
+	}
+	
+	if (!other){
+		slog("NULL other");
+		return;
+	}
+	
 	//slog("%s colliding with %s", self->name, other->name);
 }
 
 void pickup_health(Entity * self, Entity * other){
 
+	if (!self){
+		slog("NULL self");
+		return;
+	}
+	
+	if (!other){
+		slog("NULL other");
+		return;
+	}
+	
 	Character* c = (Character*)other->entData;
+	if (!c){
+		slog("No character data provided for %s", self->name);
+		return;
+	}
+
 	if (c->type == char_PLAYER) {
 		c->health += 100;
 	}
@@ -200,8 +277,22 @@ void pickup_health(Entity * self, Entity * other){
 }
 void pickup_speed(Entity * self, Entity * other){
 
+	if (!self){
+		slog("NULL self");
+		return;
+	}
+	
+	if (!other){
+		slog("NULL other");
+		return;
+	}
+	
 	Character* c = (Character*)other->entData;
-	if (c->type == char_PLAYER) {
+	if (!c){
+		slog("No character data provided for %s", self->name);
+		return;
+	}
+		if (c->type == char_PLAYER) {
 		c->speed_buff = 5;
 	}
 	slog("%s gave speed buff: x%.2f", other->name, c->speed_buff);
@@ -210,20 +301,41 @@ void pickup_speed(Entity * self, Entity * other){
 }
 void pickup_damage(Entity * self, Entity * other){
 	
+	if (!self){
+		slog("NULL self");
+		return;
+	}
+	if (!other){
+		slog("NULL other");
+		return;
+	}
+
 	for (Uint32 i = 0; i < get_entity_manager()->entity_count; i++) {
-		Entity* other = &get_entity_manager()->entity_list[i];
-		Character* otherChar = (Character*)other->entData;
+		Entity * other_in_aoe = NULL;
+		Character* other_char = NULL;
+		other_in_aoe = &get_entity_manager()->entity_list[i];		
+		if (!other_in_aoe){
+			slog("NULL other");
+			continue;
 
-		if (!other->_inuse)continue;
-		if (!otherChar)continue;
+			if (!other_in_aoe->_inuse){
+				continue;
+			}
+		}
+		
+		other_char = (Character*)other->entData;
+		if (!other_char){
+			slog("NULL other char");
+			continue;
+		}
 
-		switch (other->type)
+		switch (other_in_aoe->type)
 		{
 		case ent_CHAR:
-			if (otherChar->type == char_AI) {
+			if (other_char->type == char_AI) {
 				// Do damage
-				otherChar->health = 1;
-				slog("can instakill %s on %.2f", other->name, otherChar->health);
+				other_char->health = 1;
+				slog("can instakill %s on %.2f", other->name, other_char->health);
 
 			}
 			break;
@@ -233,19 +345,40 @@ void pickup_damage(Entity * self, Entity * other){
 	}
 	entity_free(self);
 }
-void pickup_kaboom(Entity * self, Entity * other){
-	
-	for (Uint32 i = 0; i < get_entity_manager()->entity_count; i++) {
-		Entity* other = &get_entity_manager()->entity_list[i];
-		Character* otherChar = (Character*)other->entData;
+void pickup_kaboom(Entity * self, Entity * other){	
+		
+	if (!self){
+		slog("NULL self");
+		return;
+	}
+	if (!other){
+		slog("NULL other");
+		return;
+	}
 
-		if (!other->_inuse)continue;
-		if (!otherChar)continue;
+	for (Uint32 i = 0; i < get_entity_manager()->entity_count; i++) {
+		Entity * other_in_aoe = NULL;
+		Character* other_char = NULL;
+		other_in_aoe = &get_entity_manager()->entity_list[i];		
+		if (!other_in_aoe){
+			slog("NULL other");
+			continue;
+
+			if (!other_in_aoe->_inuse){
+				continue;
+			}
+		}
+		
+		other_char = (Character*)other->entData;
+		if (!other_char){
+			slog("NULL other char");
+			continue;
+		}
 
 		switch (other->type)
 		{
 		case ent_CHAR:
-			if (otherChar->type == char_AI) {
+			if (other_char->type == char_AI) {
 				// Do damage
 				slog("kaboom target %s", other->name);
 
@@ -261,6 +394,11 @@ void pickup_kaboom(Entity * self, Entity * other){
 }
 
 void sine_movement(Entity* self) {
+
+	if (!self){
+		slog("NULL self");
+		return;
+	}
 
 	self->position.y = (sin(SDL_GetTicks() * 0.01));
 	self->position.y += self->rigidbody.collider_radius;
