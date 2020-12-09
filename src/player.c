@@ -191,12 +191,12 @@ void player_think(Entity* self) {
 			slog("Weapon 3 selected");
 			swapped = 1;
 		}
-		if (keys[SDL_SCANCODE_4]) {
-			character->primaryAttack = projectile_monkeybomb_spawn;
-				character->CLDN2 = 5000;
-			slog("Weapon 4 selected");
-			swapped = 1;
-		}
+		// if (keys[SDL_SCANCODE_4]) {
+		// 	character->primaryAttack = projectile_monkeybomb_spawn;
+		// 		character->CLDN2 = 5000;
+		// 	slog("Weapon 4 selected");
+		// 	swapped = 1;
+		// }
 		if (keys[SDL_SCANCODE_5]) {
 			swapped = 1;
 
