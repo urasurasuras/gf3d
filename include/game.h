@@ -25,6 +25,15 @@
 
 #define GRAVITATIONAL_ACCELERATION 8 // yea, it's 8, deal with it
 
+typedef struct GameInfo_S {
+	
+    Uint32 yellow_dino_spawn_cldn;
+    Uint32 red_dino_spawn_cldn;
+    Uint32 blue_dino_spawn_cldn;
+    Uint32 pickup_spawn_cldn;
+
+}GameInfo;
+
 typedef struct GameManager_S {
 	Entity * player;
 	Level * level;
@@ -35,6 +44,8 @@ typedef struct GameManager_S {
 	Vector2D mousePos;
 	int mx, my;
 	int lastMx, lastMy;
+
+	GameInfo game_info;
 }GameManager;
 
 const Uint8* keys;

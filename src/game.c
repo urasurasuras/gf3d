@@ -1,9 +1,47 @@
 #include "game.h"
 #include "gfc_matrix.h"
 #include "gfc_types.h"
+#include "simple_json.h"
 
 static GameManager game_manager = { 0 };
 
+void game_info_load(){
+    SJson *cfgFile = sj_load("cfg/spawn.cfg");
+
+    if (!cfgFile){
+        slog("no config file, creating BLANK...");
+
+        SJson *allData = NULL;
+        allData = sj_object_new();
+        if (!allData)return;
+
+        sj_object_insert(allData, "yellow_dino_spawn_cldn", sj_new_int(1000));
+        sj_object_insert(allData, "red_dino_spawn_cldn", sj_new_int(1000));
+        sj_object_insert(allData, "blue_dino_spawn_cldn", sj_new_int(1000));
+        sj_object_insert(allData, "pickup_spawn_cldn", sj_new_int(1000));
+
+        sj_echo(allData);
+        sj_save(allData, "cfg/spawn.cfg");
+        sj_free(allData);
+
+        exit(0);
+        return;
+    }
+
+    sj_echo(cfgFile);
+
+    SJson *yellow_dino_spawn_cldn = sj_object_get_value(cfgFile, "yellow_dino_spawn_cldn");;
+    SJson *red_dino_spawn_cldn = sj_object_get_value(cfgFile, "red_dino_spawn_cldn");
+    SJson *blue_dino_spawn_cldn = sj_object_get_value(cfgFile, "blue_dino_spawn_cldn");
+    SJson *pickup_spawn_cldn = sj_object_get_value(cfgFile, "pickup_spawn_cldn");
+    sj_get_integer_value(yellow_dino_spawn_cldn, &game_manager.game_info.yellow_dino_spawn_cldn);
+    sj_get_integer_value(red_dino_spawn_cldn, &game_manager.game_info.red_dino_spawn_cldn);
+    sj_get_integer_value(blue_dino_spawn_cldn, &game_manager.game_info.blue_dino_spawn_cldn);
+    sj_get_integer_value(pickup_spawn_cldn, &game_manager.game_info.pickup_spawn_cldn);
+
+    sj_free(cfgFile);
+
+}
 void floor_rotate(Entity* self, float deltaTime) {
     if (keys[SDL_SCANCODE_Q]) {
         self->rotation.x += (deltaTime);
@@ -80,20 +118,23 @@ int main(int argc,char *argv[])
     //Camera * gf3d_camera = NULL;
 
     Sprite *hud;
+    Vector2D hudpos;
 
     Uint32 LAST =0;
     Uint32 NOW =0;
+    
+    game_info_load();
 
-    Uint32 yellow_dino_spawn_cldn = 5000;
+    Uint32 yellow_dino_spawn_cldn = game_manager.game_info.yellow_dino_spawn_cldn;
     Uint32 yellow_dino_spawn_last = 0;
     
-    Uint32 red_dino_spawn_cldn = 20000;
+    Uint32 red_dino_spawn_cldn = game_manager.game_info.red_dino_spawn_cldn;
     Uint32 red_dino_spawn_last = 0;
         
-    Uint32 blue_dino_spawn_cldn = 10000;
+    Uint32 blue_dino_spawn_cldn = game_manager.game_info.blue_dino_spawn_cldn;
     Uint32 blue_dino_spawn_last = 0;
 
-    Uint32 pickup_spawn_cldn = 10000;
+    Uint32 pickup_spawn_cldn = game_manager.game_info.pickup_spawn_cldn;
     Uint32 pickup_spawn_last = 0;
 
     int half_w = window_W / 2;
@@ -171,6 +212,7 @@ int main(int argc,char *argv[])
     // spawn_dino_yellow_random();
     // spawn_dino_yellow_random();
     hud = gf3d_sprite_load("images/hud.png",-1,-1,0);
+    hudpos = vector2d(0,0);
 
     // main game loop
     slog("MAIN LOOP BEGIN");
@@ -228,15 +270,15 @@ int main(int argc,char *argv[])
         }
         if (red_dino_spawn_last + red_dino_spawn_cldn < SDL_GetTicks()) {
             red_dino_spawn_last = SDL_GetTicks();
-            //spawn_dino_red_random();
+            spawn_dino_red_random();
         }
         if (blue_dino_spawn_last + blue_dino_spawn_cldn < SDL_GetTicks()) {
             blue_dino_spawn_last = SDL_GetTicks();
-            //spawn_dino_blue_random();
+            spawn_dino_blue_random();
         }
         if (pickup_spawn_last + pickup_spawn_cldn < SDL_GetTicks()) {
             pickup_spawn_last = SDL_GetTicks();
-            //spawn_pickup_random();
+            spawn_pickup_random();
         }
 
 
@@ -247,12 +289,10 @@ int main(int argc,char *argv[])
         gf3d_vgraphics_update_view();
 
         // configure render command for graphics command pool
-        // for each mesh, get a command and configure it from the pool
         bufferFrame = gf3d_vgraphics_render_begin();
-
-        //slog("Buffer frame: %d", bufferFrame);
-        gf3d_pipeline_reset_frame(gf3d_vgraphics_get_models_pipeline(),bufferFrame);
-        gf3d_pipeline_reset_frame(gf3d_vgraphics_get_overlay_pipeline(),bufferFrame);
+        // for each mesh, get a command and configure it from the pool
+            gf3d_pipeline_reset_frame(gf3d_vgraphics_get_models_pipeline(),bufferFrame);
+            gf3d_pipeline_reset_frame(gf3d_vgraphics_get_overlay_pipeline(),bufferFrame);
 
             commandBuffer = gf3d_command_rendering_begin(bufferFrame, gf3d_vgraphics_get_models_pipeline());
 
@@ -263,7 +303,11 @@ int main(int argc,char *argv[])
             // 2D overlay rendering
             commandBuffer = gf3d_command_rendering_begin(bufferFrame,gf3d_vgraphics_get_overlay_pipeline());
 
-                gf3d_sprite_draw(hud,vector2d(0,0),vector2d(2,2),0, bufferFrame,commandBuffer);
+                // hudpos.x += 1;
+                // hudpos.y += 1;
+                //hud->frameHeight = 256;
+                //hud->frameWidth = 256;
+                gf3d_sprite_draw(hud,hudpos,vector2d(1,1),0, bufferFrame,commandBuffer);
                 // gf3d_sprite_draw(mouse,vector2d(mousex,mousey),vector2d(1,1),mouseFrame, bufferFrame,commandBuffer);
                 
             gf3d_command_rendering_end(commandBuffer);

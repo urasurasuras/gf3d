@@ -131,6 +131,14 @@ void spawn_dino_red_random() {
     memset(char_data->charData, 0, sizeof(MOB));
 
     // Data assignment
+    dino->type = ent_CHAR;
+    gfc_word_cpy(dino->name, "Dino");
+    dino->model = gf3d_model_load("dino_red");
+    if(!dino->model){
+        slog("NULL dino model");
+        entity_free(dino);
+        return;
+    }
     dino->position.y = 6;//height
     dino->position.z = gfc_crandom() * game_manager->level->bounds.d;
     dino->position.x = gfc_crandom() * game_manager->level->bounds.w;
@@ -201,6 +209,14 @@ void spawn_dino_blue_random() {
     memset(char_data->charData, 0, sizeof(MOB));
 
     // Data assignment
+    dino->type = ent_CHAR;
+    gfc_word_cpy(dino->name, "Dino");
+    dino->model = gf3d_model_load("dino_blue");
+    if(!dino->model){
+        slog("NULL dino model");
+        entity_free(dino);
+        return;
+    }
     dino->position.y = 6;//height
     dino->position.z = gfc_crandom() * game_manager->level->bounds.d;
     dino->position.x = gfc_crandom() * game_manager->level->bounds.w;
