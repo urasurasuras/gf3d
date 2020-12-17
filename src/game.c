@@ -2,6 +2,7 @@
 #include "gfc_matrix.h"
 #include "gfc_types.h"
 #include "simple_json.h"
+#include "menu.h"
 
 static GameManager game_manager = { 0 };
 
@@ -117,9 +118,6 @@ int main(int argc,char *argv[])
     Entity * player = NULL;
     //Camera * gf3d_camera = NULL;
 
-    Sprite *hud;
-    Vector2D hudpos;
-
     Uint32 LAST =0;
     Uint32 NOW =0;
     
@@ -161,6 +159,7 @@ int main(int argc,char *argv[])
 	slog_sync();
 
     entity_init(128);
+    UI_manager_init(32);
 
     // Load all models once
     // gf3d_model_load("dino");
@@ -211,8 +210,9 @@ int main(int argc,char *argv[])
     // spawn_dino_yellow_random();
     // spawn_dino_yellow_random();
     // spawn_dino_yellow_random();
-    hud = gf3d_sprite_load("images/hud.png",-1,-1,0);
-    hudpos = vector2d(0,0);
+    UI_Element * test_hud = UI_element_new();
+    test_hud->sprite = gf3d_sprite_load("images/hud.png",-1,-1,0);
+    test_hud->position = vector2d(0,0);
 
     // main game loop
     slog("MAIN LOOP BEGIN");
@@ -284,7 +284,10 @@ int main(int argc,char *argv[])
 
         SDL_WarpMouseInWindow(NULL, half_w, half_h);
 
-        entity_think_all(gameManager()->deltaTime);
+        if (!game_manager.paused){
+            entity_think_all(gameManager()->deltaTime);
+        }
+        
 
         gf3d_vgraphics_update_view();
 
@@ -303,13 +306,8 @@ int main(int argc,char *argv[])
             // 2D overlay rendering
             commandBuffer = gf3d_command_rendering_begin(bufferFrame,gf3d_vgraphics_get_overlay_pipeline());
 
-                // hudpos.x += 1;
-                // hudpos.y += 1;
-                //hud->frameHeight = 256;
-                //hud->frameWidth = 256;
-                gf3d_sprite_draw(hud,hudpos,vector2d(1,1),0, bufferFrame,commandBuffer);
-                // gf3d_sprite_draw(mouse,vector2d(mousex,mousey),vector2d(1,1),mouseFrame, bufferFrame,commandBuffer);
-                
+                UI_draw_all(bufferFrame, commandBuffer);
+
             gf3d_command_rendering_end(commandBuffer);
 
 
@@ -321,6 +319,7 @@ int main(int argc,char *argv[])
             slog("Player health %.2f", player_data->health); 
         }
         if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
+        if (keys[SDL_SCANCODE_TAB])game_manager.paused = true;
     }    
     
     vkDeviceWaitIdle(gf3d_vgraphics_get_default_logical_device());    

@@ -68,7 +68,7 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 		return;
 		}
 	if (!self->model){
-		slog("Cannot draw null model of %s", self->name);
+		//slog("Cannot draw null model of %s", self->name);
 		return;
 	}
 	Vector3D drawPos;
@@ -353,7 +353,7 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 
 		otherChar = (Character*)e2->entData;
 		if(!otherChar){
-			slog("%s has no char data", e2->name);
+			//slog("%s has no char data", e2->name);
 			break;
 		}
 

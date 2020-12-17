@@ -35,6 +35,8 @@ typedef struct GameInfo_S {
 }GameInfo;
 
 typedef struct GameManager_S {
+	Bool paused;
+	
 	Entity * player;
 	Level * level;
 	Camera * gf3d_camera;
