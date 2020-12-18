@@ -43,6 +43,50 @@ void game_info_load(){
     sj_free(cfgFile);
 
 }
+
+void game_level_load() {
+
+    Character* player_data = NULL;
+    Entity* player = NULL;
+
+    // Init Game Manager
+    game_manager.lastMx = 0;
+    game_manager.lastMy = 0;
+    game_manager.deltaTime = 0;
+    game_manager.gf3d_camera = gf3d_get_cam();
+
+    // Create PLAYER
+    game_manager.player = player_spawn();
+
+
+    // Create FLOOR
+    Entity* floor = entity_new();
+    floor->entData = malloc(sizeof(Level));
+    Level* floorData = (Level*)floor->entData;
+    floor->type = ent_LEVEL;
+    gfc_word_cpy(floor->name, "Floor");
+    floor->model = gf3d_model_load("floor");
+    floor->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
+    floorData->bounds.x = -160;
+    floorData->bounds.y = 0;
+    floorData->bounds.z = -160;
+    floorData->bounds.w = 160;
+    floorData->bounds.h = 160;
+    floorData->bounds.d = 160;
+    floor->entData = floorData;
+    gameManager()->level = floorData;//FIX: level bounds not correct
+
+    Entity* walls = entity_new();
+    gfc_word_cpy(walls->name, "Walls");
+    walls->model = gf3d_model_load("walls");
+    walls->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
+
+    // spawn_dino_yellow_random();
+    // spawn_dino_yellow_random();
+    // spawn_dino_yellow_random();
+    // spawn_dino_yellow_random();
+    // spawn_dino_yellow_random();
+}
 void floor_rotate(Entity* self, float deltaTime) {
     if (keys[SDL_SCANCODE_Q]) {
         self->rotation.x += (deltaTime);
@@ -114,8 +158,6 @@ int main(int argc,char *argv[])
     Uint32 bufferFrame = 0;
     VkCommandBuffer commandBuffer;
 
-    Character * player_data = NULL;
-    Entity * player = NULL;
     //Camera * gf3d_camera = NULL;
 
     Uint32 LAST =0;
@@ -171,45 +213,7 @@ int main(int argc,char *argv[])
     // gf3d_model_load("pickup_speed");
     // gf3d_model_load("pickup_kaboom");
     /**/
-
-    // Init Game Manager
-    game_manager.lastMx = 0;
-    game_manager.lastMy = 0;
-    game_manager.deltaTime = 0;
-    game_manager.gf3d_camera = gf3d_get_cam();
-
-    // Create PLAYER
-    game_manager.player = player_spawn();
-    player_data = (Character*)game_manager.player->entData;
-    player = game_manager.player;
-   
-    // Create FLOOR
-    Entity* floor = entity_new();
-    floor->entData = malloc(sizeof(Level));
-    Level* floorData = (Level*)floor->entData;
-    floor->type = ent_LEVEL;
-    gfc_word_cpy(floor->name, "Floor");
-    floor->model = gf3d_model_load("floor");
-    floor->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
-    floorData->bounds.x = -160;
-    floorData->bounds.y = 0;
-    floorData->bounds.z = -160;
-    floorData->bounds.w = 160;
-    floorData->bounds.h = 160;
-    floorData->bounds.d = 160;
-    floor->entData = floorData;
-    gameManager()->level = floorData;//FIX: level bounds not correct
-
-    Entity* walls = entity_new();
-    gfc_word_cpy(walls->name, "Walls");
-    walls->model = gf3d_model_load("walls");
-    walls->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
-
-    // spawn_dino_yellow_random();
-    // spawn_dino_yellow_random();
-    // spawn_dino_yellow_random();
-    // spawn_dino_yellow_random();
-    // spawn_dino_yellow_random();
+    game_level_load();
     UI_Element * test_hud = UI_element_new();
     test_hud->sprite = gf3d_sprite_load("images/hud.png",-1,-1,0);
     test_hud->position = vector2d(0,0);
@@ -226,70 +230,62 @@ int main(int argc,char *argv[])
         SDL_GetMouseState(&game_manager.mx, &game_manager.my);
 
         //update game things here
-        //slog("deltaTime: %f", gameManager()->deltaTime);
-        // Get mouse input delta
-        player->rotation.x -= (game_manager.my - half_h) * 0.001;// V look (pitch)
-        player->rotation.y += (game_manager.mx - half_w) * 0.001;// H look (yaw)
+        if (!game_manager.paused) {
+            // Get mouse input delta
+            game_manager.player->rotation.x -= (game_manager.my - half_h) * 0.001;// V look (pitch)
+            game_manager.player->rotation.y += (game_manager.mx - half_w) * 0.001;// H look (yaw)
 
-        game_manager.gf3d_camera->rotation.x = player->rotation.x;
-        game_manager.gf3d_camera->rotation.y = player->rotation.y;
+            game_manager.gf3d_camera->rotation.x = game_manager.player->rotation.x;
+            game_manager.gf3d_camera->rotation.y = game_manager.player->rotation.y;
 
-        // Clamp rotation
-        if (player->rotation.x > 1.5) {
-            player->rotation.x = 1.5;
+            // Clamp rotation
+            if (game_manager.player->rotation.x > 1.5) {
+                game_manager.player->rotation.x = 1.5;
+            }
+            else if (game_manager.player->rotation.x < -1.5) {
+                game_manager.player->rotation.x = -1.5;
+            }
+
+            gf3d_camera_FPS_rotation(
+                game_manager.gf3d_camera->view,
+                game_manager.player->position,
+                game_manager.gf3d_camera->rotation.x,
+                -game_manager.gf3d_camera->rotation.y
+            );
+
+
+
+            SDL_WarpMouseInWindow(NULL, half_w, half_h);
+
+            entity_think_all(gameManager()->deltaTime);
+
+            gf3d_vgraphics_update_view();
+
+
+            if (yellow_dino_spawn_last + yellow_dino_spawn_cldn < SDL_GetTicks()) {
+                yellow_dino_spawn_last = SDL_GetTicks();
+                spawn_dino_yellow_random();
+            }
+            if (red_dino_spawn_last + red_dino_spawn_cldn < SDL_GetTicks()) {
+                red_dino_spawn_last = SDL_GetTicks();
+                spawn_dino_red_random();
+            }
+            if (blue_dino_spawn_last + blue_dino_spawn_cldn < SDL_GetTicks()) {
+                blue_dino_spawn_last = SDL_GetTicks();
+                spawn_dino_blue_random();
+            }
+            if (pickup_spawn_last + pickup_spawn_cldn < SDL_GetTicks()) {
+                pickup_spawn_last = SDL_GetTicks();
+                spawn_pickup_random();
+            }
         }
-        else if (player->rotation.x < -1.5) {
-            player->rotation.x = -1.5;
-        }
-
-        gf3d_camera_FPS_rotation(
-            game_manager.gf3d_camera->view,
-            player->position,
-            game_manager.gf3d_camera->rotation.x,
-            -game_manager.gf3d_camera->rotation.y
-        );
+        
 
         LAST = NOW;
         NOW = SDL_GetTicks();
 
         game_manager.deltaTime = ((float)(NOW - LAST) / 1000);
-        /*
 
-        LAST = NOW;
-        NOW = SDL_GetPerformanceCounter();
-
-        gameManager()->deltaTime = ((float)(NOW - LAST) / (float)SDL_GetPerformanceFrequency());*/
-
-        //if (play) {
-            //slog("FPS: %.0f", 1/ gameManager()->deltaTime);
-        //}
-        
-        if (yellow_dino_spawn_last + yellow_dino_spawn_cldn < SDL_GetTicks()) {
-            yellow_dino_spawn_last = SDL_GetTicks();
-            spawn_dino_yellow_random();
-        }
-        if (red_dino_spawn_last + red_dino_spawn_cldn < SDL_GetTicks()) {
-            red_dino_spawn_last = SDL_GetTicks();
-            spawn_dino_red_random();
-        }
-        if (blue_dino_spawn_last + blue_dino_spawn_cldn < SDL_GetTicks()) {
-            blue_dino_spawn_last = SDL_GetTicks();
-            spawn_dino_blue_random();
-        }
-        if (pickup_spawn_last + pickup_spawn_cldn < SDL_GetTicks()) {
-            pickup_spawn_last = SDL_GetTicks();
-            spawn_pickup_random();
-        }
-
-
-        SDL_WarpMouseInWindow(NULL, half_w, half_h);
-
-        if (!game_manager.paused){
-            entity_think_all(gameManager()->deltaTime);
-        }
-        
-
-        gf3d_vgraphics_update_view();
 
         // configure render command for graphics command pool
         bufferFrame = gf3d_vgraphics_render_begin();
@@ -314,9 +310,9 @@ int main(int argc,char *argv[])
         gf3d_vgraphics_render_end(bufferFrame);
 
         //play = 1; // start game after we are done with the first game loop
-        if (player_data->health <= 0) { 
+        if (game_manager.player_data->health <= 0) {
             //done = 1; 
-            slog("Player health %.2f", player_data->health); 
+            slog("Player health %.2f", game_manager.player_data->health);
         }
         if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
         if (keys[SDL_SCANCODE_TAB])game_manager.paused = true;

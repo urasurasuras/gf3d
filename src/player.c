@@ -47,6 +47,7 @@ Entity * player_spawn(){
     player_data->type = char_PLAYER;
 	
 	player->entData = player_data;
+	gameManager()->player_data = player_data;
 
 	return player;
 }

@@ -38,6 +38,7 @@ typedef struct GameManager_S {
 	Bool paused;
 	
 	Entity * player;
+	Character* player_data;
 	Level * level;
 	Camera * gf3d_camera;
 
