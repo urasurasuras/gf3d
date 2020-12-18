@@ -215,8 +215,14 @@ int main(int argc,char *argv[])
     /**/
     game_level_load();
     UI_Element * test_hud = UI_element_new();
-    test_hud->sprite = gf3d_sprite_load("images/hud.png",-1,-1,0);
-    test_hud->position = vector2d(0,0);
+    test_hud->sprite = gf3d_sprite_load("images/button.png",-1,-1,0);
+    test_hud->position = vector2d(800,450);
+    //test_hud->drawOffset = vector2d(-test_hud->sprite->frameWidth*.5, -test_hud->sprite->frameHeight*.5);
+    test_hud->box.x = test_hud->position.x;
+    test_hud->box.y = test_hud->position.y;
+    test_hud->box.w = test_hud->sprite->frameWidth;
+    test_hud->box.h = test_hud->sprite->frameHeight;
+    test_hud->_active = 0;
 
     // main game loop
     slog("MAIN LOOP BEGIN");
@@ -279,6 +285,10 @@ int main(int argc,char *argv[])
                 spawn_pickup_random();
             }
         }
+        else {
+            mouse_think();
+            //slog("Game paused");
+        }
         
 
         LAST = NOW;
@@ -315,8 +325,11 @@ int main(int argc,char *argv[])
             slog("Player health %.2f", game_manager.player_data->health);
         }
         if (keys[SDL_SCANCODE_ESCAPE])done = 1; // exit condition
-        if (keys[SDL_SCANCODE_TAB])game_manager.paused = true;
-    }    
+        if (keys[SDL_SCANCODE_TAB]) {
+            game_manager.paused = true;
+            test_hud->_active = 1;
+        }
+    }
     
     vkDeviceWaitIdle(gf3d_vgraphics_get_default_logical_device());    
     //cleanup

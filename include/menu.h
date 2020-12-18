@@ -14,6 +14,9 @@ typedef struct UI_Element_S
     TextWord    name;               /**<Name of this entity (for debugging)*/
 
     Uint8       _inuse;             /**<Check if entity in memory is active or not*/
+
+    Uint32      _active;            /**<Check if UI element should be rendered/updated */
+
     Sprite      *sprite;            /**<A pointer to the sprite*/
     int         collider_shape;     /**<Indicates whether collider is cirlular or rectangular*/
     float       frame;              /**<Current frame of sripte*/
@@ -28,6 +31,11 @@ typedef struct UI_Element_S
     void        (*think)(struct UI_Element_S *self);
 
 }UI_Element;
+
+/**
+* @brief mouse thonk
+*/
+void mouse_think();
 
 /**
  * @brief get a pointer to a new UI_element

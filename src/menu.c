@@ -10,6 +10,7 @@
 #include "simple_json_value.h"
 #include "entity.h"
 #include "player.h"
+#include "collision.h"
 
 typedef struct 
 {
@@ -19,6 +20,27 @@ typedef struct
 }MenuManager;
 
 static MenuManager menu_manager = {0};
+
+void mouse_think() {
+    int i;
+    GameManager* gm = NULL;
+    gm = gameManager();
+    if (!gm) {
+        slog("NULL GAME MANAGER");
+        slog_sync();
+        exit(1);
+    }
+    slog("mouse over");
+
+    for (i = 0; i < menu_manager.maxMenus; i++) {
+        if (menu_manager.menuList[i]._active) {
+            
+            if (collide_menu(menu_manager.menuList[i].box, gm->mousePos)) {
+                slog("mouse over");
+            }            
+        }
+    }
+}
 
 UI_Element *UI_element_new(){
     int i;
@@ -75,7 +97,6 @@ void UI_update(UI_Element *self){
     if (self->think){
         self->think(self);
     }
-
 }
 
 void UI_update_all(){
@@ -93,9 +114,13 @@ void UI_draw(UI_Element *self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
         slog("cannot draw, null menu provided");
         return;
     }
+
+    Vector2D draw_pos;
+    vector2d_add(draw_pos, self->position, self->drawOffset);
+
     gf3d_sprite_draw(
         self->sprite,
-        self->position,
+        draw_pos,
         self->scale,
         self->frame,
         bufferFrame,
@@ -114,6 +139,8 @@ void UI_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer)
     for (i = 0;i < menu_manager.maxMenus;i++)
     {
         if (!menu_manager.menuList[i]._inuse)continue;
+        if (!menu_manager.menuList[i]._active)continue;
+
         UI_draw(&menu_manager.menuList[i], bufferFrame, commandBuffer);
     }
 }
