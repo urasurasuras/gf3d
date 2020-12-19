@@ -34,7 +34,16 @@ typedef struct GameInfo_S {
 
 }GameInfo;
 
+typedef enum {
+	PAUSE,
+	PLAY
+}GameState;
+
 typedef struct GameManager_S {
+	
+	// GameState scene_index;
+	
+	Bool done;
 	Bool paused;
 	
 	Entity * player;

@@ -11,6 +11,8 @@
 #include "entity.h"
 #include "player.h"
 #include "collision.h"
+#include "gfc_input.h"
+#include "gf2d_mouse.h"
 
 typedef struct 
 {
@@ -31,17 +33,23 @@ void mouse_think() {
         slog_sync();
         exit(1);
     }
+
+    gf2d_mouse_update();
+
     Vector2D mousepos;
     vector2d_copy(mousepos, gm->mousePos);
 
     for (i = 0; i < menu_manager.maxMenus; i++) {
         UI_Element * UI = &menu_manager.menuList[i];
-        if (UI->_active) {
+        // if (UI->_active) {
             
             if (collide_menu(UI->box, mousepos)) {
-                slog("mouse over2");
+                if (gf2d_mouse_button_pressed(0)){
+                    slog("KLOK");
+                    UI->onClick(UI);                    
+                }
             }            
-        }
+        // }
     }
 }
 
@@ -142,7 +150,7 @@ void UI_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer)
     for (i = 0;i < menu_manager.maxMenus;i++)
     {
         if (!menu_manager.menuList[i]._inuse)continue;
-        if (!menu_manager.menuList[i]._active)continue;
+        // if (!menu_manager.menuList[i]._active)continue;
 
         UI_draw(&menu_manager.menuList[i], bufferFrame, commandBuffer);
     }
