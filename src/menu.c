@@ -23,6 +23,7 @@ static MenuManager menu_manager = {0};
 
 void mouse_think() {
     int i;
+
     GameManager* gm = NULL;
     gm = gameManager();
     if (!gm) {
@@ -30,13 +31,15 @@ void mouse_think() {
         slog_sync();
         exit(1);
     }
-    slog("mouse over");
+    Vector2D mousepos;
+    vector2d_copy(mousepos, gm->mousePos);
 
     for (i = 0; i < menu_manager.maxMenus; i++) {
-        if (menu_manager.menuList[i]._active) {
+        UI_Element * UI = &menu_manager.menuList[i];
+        if (UI->_active) {
             
-            if (collide_menu(menu_manager.menuList[i].box, gm->mousePos)) {
-                slog("mouse over");
+            if (collide_menu(UI->box, mousepos)) {
+                slog("mouse over2");
             }            
         }
     }

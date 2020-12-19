@@ -45,8 +45,8 @@ typedef struct GameManager_S {
 	Uint32 lastUpdate;
 	float deltaTime;
 	Vector2D mousePos;
-	int mx, my;
-	int lastMx, lastMy;
+	// int mx, my;
+	// int lastMx, lastMy;
 
 	GameInfo game_info;
 }GameManager;

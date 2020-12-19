@@ -50,8 +50,8 @@ void game_level_load() {
     Entity* player = NULL;
 
     // Init Game Manager
-    game_manager.lastMx = 0;
-    game_manager.lastMy = 0;
+    // game_manager.lastMx = 0;
+    // game_manager.lastMy = 0;
     game_manager.deltaTime = 0;
     game_manager.gf3d_camera = gf3d_get_cam();
 
@@ -220,8 +220,8 @@ int main(int argc,char *argv[])
     //test_hud->drawOffset = vector2d(-test_hud->sprite->frameWidth*.5, -test_hud->sprite->frameHeight*.5);
     test_hud->box.x = test_hud->position.x;
     test_hud->box.y = test_hud->position.y;
-    test_hud->box.w = test_hud->sprite->frameWidth;
-    test_hud->box.h = test_hud->sprite->frameHeight;
+    test_hud->box.w = test_hud->sprite->frameWidth*.5;
+    test_hud->box.h = test_hud->sprite->frameHeight*.5;
     test_hud->_active = 0;
 
     // main game loop
@@ -233,13 +233,15 @@ int main(int argc,char *argv[])
         SDL_PumpEvents();   // update SDL's internal event structures
         keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
         //SDL_GetRelativeMouseState(&lastMx, &lastMy);
-        SDL_GetMouseState(&game_manager.mx, &game_manager.my);
-
+        int mx,my;
+        SDL_GetMouseState(&mx, &my);
+        game_manager.mousePos.x = (float)mx;
+        game_manager.mousePos.y = (float)my;
         //update game things here
         if (!game_manager.paused) {
             // Get mouse input delta
-            game_manager.player->rotation.x -= (game_manager.my - half_h) * 0.001;// V look (pitch)
-            game_manager.player->rotation.y += (game_manager.mx - half_w) * 0.001;// H look (yaw)
+            game_manager.player->rotation.x -= (game_manager.mousePos.y - half_h) * 0.001;// V look (pitch)
+            game_manager.player->rotation.y += (game_manager.mousePos.x - half_w) * 0.001;// H look (yaw)
 
             game_manager.gf3d_camera->rotation.x = game_manager.player->rotation.x;
             game_manager.gf3d_camera->rotation.y = game_manager.player->rotation.y;
