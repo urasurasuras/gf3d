@@ -72,8 +72,11 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 		return;
 	}
 
-	self->frame = self->frame + 0.05;
-	if (self->frame >= self->max_frames)self->frame = 0;
+	self->frame = self->frame + 0.1;
+	if (self->frame >= self->max_frames){
+		slog("Reset frame");
+		self->frame = 0;
+	}
 
 	Vector3D drawPos;
 

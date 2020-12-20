@@ -146,7 +146,7 @@ void game_level_load() {
     gfc_word_cpy(walls->name, "Walls");
     walls->model = gf3d_model_load("walls");
     walls->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
-    
+    gf3d_model_load_animated("dino", 1, 250);
     // spawn_dino_yellow_random();
     // spawn_dino_yellow_random();
     // spawn_dino_yellow_random();

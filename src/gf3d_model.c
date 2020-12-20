@@ -124,8 +124,12 @@ Model* gf3d_model_load(char* filename)
 
     snprintf(assetname, GFCLINELEN, "images/%s.png", filename);
     model->texture = gf3d_texture_load(assetname);
+    if (!model->texture) {
+        slog("Loading default texture");
 
-    //model->frameCount = 1;
+        model->texture = gf3d_texture_load("images/default.png");
+    }
+    model->frameCount = 1;
 
     return model;
 }
