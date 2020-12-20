@@ -71,6 +71,10 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 		//slog("Cannot draw null model of %s", self->name);
 		return;
 	}
+
+	self->frame = self->frame + 0.05;
+	if (self->frame >= self->max_frames)self->frame = 0;
+
 	Vector3D drawPos;
 
 
@@ -104,7 +108,7 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 	vector3d_add(drawRot, self->rotation, self->modelRotOffset);
 	setRotation(self->modelMatrix, drawRot);
 
-	gf3d_model_draw(self->model, bufferFrame, commandBuffer, self->modelMatrix);
+	gf3d_model_draw(self->model, bufferFrame, commandBuffer, self->modelMatrix, self->frame);
 }
 
 void entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer) {

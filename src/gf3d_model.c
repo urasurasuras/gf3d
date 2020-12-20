@@ -1,5 +1,7 @@
 #include <assert.h>
 
+#include <stdio.h>
+
 #include "simple_logger.h"
 
 #include "gf3d_model.h"
@@ -9,28 +11,28 @@
 
 typedef struct
 {
-    Model               *   model_list;
+    Model* model_list;
     Uint32                  max_models;
     Uint32                  chain_length;   /**<length of swap chain*/
     VkDevice                device;
-    Pipeline            *   pipe;           /**<the pipeline associated with model rendering*/
+    Pipeline* pipe;           /**<the pipeline associated with model rendering*/
 }ModelManager;
 
-static ModelManager gf3d_model = {0};
+static ModelManager gf3d_model = { 0 };
 
-void gf3d_model_delete(Model *model);
+void gf3d_model_delete(Model* model);
 
-void gf3d_model_create_uniform_buffer(Model *model);
-void gf3d_model_create_descriptor_pool(Model *model);
-void gf3d_model_create_descriptor_sets(Model *model);
+void gf3d_model_create_uniform_buffer(Model* model);
+void gf3d_model_create_descriptor_pool(Model* model);
+void gf3d_model_create_descriptor_sets(Model* model);
 void gf3d_model_create_descriptor_set_layout();
-void gf3d_model_update_uniform_buffer(Model *model,uint32_t currentImage,Matrix4 modelMat);
-VkDescriptorSetLayout * gf3d_model_get_descriptor_set_layout();
+void gf3d_model_update_uniform_buffer(Model* model, uint32_t currentImage, Matrix4 modelMat);
+VkDescriptorSetLayout* gf3d_model_get_descriptor_set_layout();
 
 void gf3d_model_manager_close()
 {
     int i;
-    for (i = 0; i < gf3d_model.max_models;i++)
+    for (i = 0; i < gf3d_model.max_models; i++)
     {
         gf3d_model_delete(&gf3d_model.model_list[i]);
     }
@@ -38,11 +40,11 @@ void gf3d_model_manager_close()
     {
         free(gf3d_model.model_list);
     }
-    memset(&gf3d_model,0,sizeof(ModelManager));
+    memset(&gf3d_model, 0, sizeof(ModelManager));
     slog("model manager closed");
 }
 
-void gf3d_model_manager_init(Uint32 max_models,Uint32 chain_length,VkDevice device)
+void gf3d_model_manager_init(Uint32 max_models, Uint32 chain_length, VkDevice device)
 {
     if (max_models == 0)
     {
@@ -50,19 +52,19 @@ void gf3d_model_manager_init(Uint32 max_models,Uint32 chain_length,VkDevice devi
         return;
     }
     gf3d_model.chain_length = chain_length;
-    gf3d_model.model_list = (Model *)gfc_allocate_array(sizeof(Model),max_models);
+    gf3d_model.model_list = (Model*)gfc_allocate_array(sizeof(Model), max_models);
     gf3d_model.max_models = max_models;
     gf3d_model.device = device;
     gf3d_model.pipe = gf3d_vgraphics_get_models_pipeline();
-    
+
     slog("model manager initiliazed");
     atexit(gf3d_model_manager_close);
 }
 
-Model * gf3d_model_new()
+Model* gf3d_model_new()
 {
     int i;
-    for (i = 0; i < gf3d_model.max_models;i++)
+    for (i = 0; i < gf3d_model.max_models; i++)
     {
         if (!gf3d_model.model_list[i]._inuse)
         {
@@ -76,52 +78,96 @@ Model * gf3d_model_new()
     return NULL;
 }
 
-Model * gf3d_model_load(char * filename)
+Model* gf3d_model_load_animated(char* filename, Uint32 startFrame, Uint32 endFrame)
 {
     TextLine assetname;
-    Model *model;
+    Model* model;
     model = gf3d_model_new();
+    int i, count;
     if (!model)return NULL;
-    snprintf(assetname,GFCLINELEN,"models/%s.obj",filename);
-    model->mesh = gf3d_mesh_load(assetname);
-
-    snprintf(assetname,GFCLINELEN,"images/%s.png",filename);
-    model->texture = gf3d_texture_load(assetname);
-    if (!model->texture) {
-        slog("Loading default texture");
-
-        model->texture = gf3d_texture_load("images/default.png");
+    count = endFrame - startFrame;
+    if (count <= 0)
+    {
+        gf3d_model_free(model);
+        slog("frameRange is zero or negative: %i", count);
+        return NULL;
     }
-    
+    model->frameCount = count;
+    model->mesh = (Mesh**)gfc_allocate_array(sizeof(Mesh*), count);
+    if (!model->mesh)
+    {
+        gf3d_model_free(model);
+        return NULL;
+    }
+    for (i = 0; i < count; i++)
+    {
+        snprintf(assetname, GFCLINELEN, "models/%s_%06i.obj", filename, startFrame + i);
+        model->mesh[i] = gf3d_mesh_load(assetname);
+    }
+
+    snprintf(assetname, GFCLINELEN, "images/%s.png", filename);
+    model->texture = gf3d_texture_load(assetname);
+
+
     return model;
 }
 
-void gf3d_model_free(Model *model)
+Model* gf3d_model_load(char* filename)
+{
+    TextLine assetname;
+    Model* model;
+    model = gf3d_model_new();
+    if (!model)return NULL;
+    snprintf(assetname, GFCLINELEN, "models/%s.obj", filename);
+    model->mesh = (Mesh**)gfc_allocate_array(sizeof(Mesh*), 1);
+    model->mesh[0] = gf3d_mesh_load(assetname);
+
+    snprintf(assetname, GFCLINELEN, "images/%s.png", filename);
+    model->texture = gf3d_texture_load(assetname);
+
+    //model->frameCount = 1;
+
+    return model;
+}
+
+void gf3d_model_free(Model* model)
 {
     gf3d_model_delete(model);
 }
 
-void gf3d_model_delete(Model *model)
+void gf3d_model_delete(Model* model)
 {
     int i;
     if (!model)return;
-    
+
     for (i = 0; i < model->uniformBufferCount; i++)
     {
         vkDestroyBuffer(gf3d_model.device, model->uniformBuffers[i], NULL);
         vkFreeMemory(gf3d_model.device, model->uniformBuffersMemory[i], NULL);
     }
 
-    gf3d_mesh_free(model->mesh);
+    for (i = 0; i < model->frameCount; i++)
+    {
+        gf3d_mesh_free(model->mesh[i]);
+    }
+    if (model->mesh)
+    {
+        free(model->mesh);
+    }
     gf3d_texture_free(model->texture);
 }
 
-void gf3d_model_draw(Model *model, Uint32 bufferFrame, VkCommandBuffer commandBuffer,Matrix4 modelMat)
+void gf3d_model_draw(Model* model, Uint32 bufferFrame, VkCommandBuffer commandBuffer, Matrix4 modelMat, Uint32 frame)
 {
-    VkDescriptorSet *descriptorSet = NULL;
+    VkDescriptorSet* descriptorSet = NULL;
     if (!model)
     {
         slog("cannot render a NULL model");
+        return;
+    }
+    if (frame >= model->frameCount)
+    {
+        slog("cannot render model frame %i, greater than frameCount: %i", frame, model->frameCount);
         return;
     }
     descriptorSet = gf3d_pipeline_get_descriptor_set(gf3d_model.pipe, bufferFrame);
@@ -130,15 +176,15 @@ void gf3d_model_draw(Model *model, Uint32 bufferFrame, VkCommandBuffer commandBu
         slog("failed to get a free descriptor Set for model rendering");
         return;
     }
-    gf3d_model_update_basic_model_descriptor_set(model,*descriptorSet,bufferFrame,modelMat);
-    gf3d_mesh_render(model->mesh,commandBuffer,descriptorSet);
+    gf3d_model_update_basic_model_descriptor_set(model, *descriptorSet, bufferFrame, modelMat);
+    gf3d_mesh_render(model->mesh[frame], commandBuffer, descriptorSet);
 }
 
-void gf3d_model_update_basic_model_descriptor_set(Model *model,VkDescriptorSet descriptorSet,Uint32 chainIndex,Matrix4 modelMat)
+void gf3d_model_update_basic_model_descriptor_set(Model* model, VkDescriptorSet descriptorSet, Uint32 chainIndex, Matrix4 modelMat)
 {
-    VkDescriptorImageInfo imageInfo = {0};
-    VkWriteDescriptorSet descriptorWrite[2] = {0};
-    VkDescriptorBufferInfo bufferInfo = {0};
+    VkDescriptorImageInfo imageInfo = { 0 };
+    VkWriteDescriptorSet descriptorWrite[2] = { 0 };
+    VkDescriptorBufferInfo bufferInfo = { 0 };
 
     if (!model)
     {
@@ -155,11 +201,11 @@ void gf3d_model_update_basic_model_descriptor_set(Model *model,VkDescriptorSet d
     imageInfo.imageView = model->texture->textureImageView;
     imageInfo.sampler = model->texture->textureSampler;
 
-    gf3d_model_update_uniform_buffer(model,chainIndex,modelMat);
+    gf3d_model_update_uniform_buffer(model, chainIndex, modelMat);
     bufferInfo.buffer = model->uniformBuffers[chainIndex];
     bufferInfo.offset = 0;
-    bufferInfo.range = sizeof(UniformBufferObject);        
-    
+    bufferInfo.range = sizeof(UniformBufferObject);
+
     descriptorWrite[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     descriptorWrite[0].dstSet = descriptorSet;
     descriptorWrite[0].dstBinding = 0;
@@ -173,35 +219,35 @@ void gf3d_model_update_basic_model_descriptor_set(Model *model,VkDescriptorSet d
     descriptorWrite[1].dstBinding = 1;
     descriptorWrite[1].dstArrayElement = 0;
     descriptorWrite[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorWrite[1].descriptorCount = 1;                        
+    descriptorWrite[1].descriptorCount = 1;
     descriptorWrite[1].pImageInfo = &imageInfo;
     descriptorWrite[1].pTexelBufferView = NULL; // Optional
 
     vkUpdateDescriptorSets(gf3d_model.device, 2, descriptorWrite, 0, NULL);
 }
 
-void gf3d_model_update_uniform_buffer(Model *model,uint32_t currentImage,Matrix4 modelMat)
+void gf3d_model_update_uniform_buffer(Model* model, uint32_t currentImage, Matrix4 modelMat)
 {
     void* data;
     UniformBufferObject ubo;
     ubo = gf3d_vgraphics_get_uniform_buffer_object();
-    gfc_matrix_copy(ubo.model,modelMat);
+    gfc_matrix_copy(ubo.model, modelMat);
     vkMapMemory(gf3d_model.device, model->uniformBuffersMemory[currentImage], 0, sizeof(UniformBufferObject), 0, &data);
-    
-        memcpy(data, &ubo, sizeof(UniformBufferObject));
+
+    memcpy(data, &ubo, sizeof(UniformBufferObject));
 
     vkUnmapMemory(gf3d_model.device, model->uniformBuffersMemory[currentImage]);
 }
 
 
-void gf3d_model_create_uniform_buffer(Model *model)
+void gf3d_model_create_uniform_buffer(Model* model)
 {
     int i;
     Uint32 buffercount = gf3d_model.chain_length;
     VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
-    model->uniformBuffers = (VkBuffer*)gfc_allocate_array(sizeof(VkBuffer),buffercount);
-    model->uniformBuffersMemory = (VkDeviceMemory*)gfc_allocate_array(sizeof(VkDeviceMemory),buffercount);
+    model->uniformBuffers = (VkBuffer*)gfc_allocate_array(sizeof(VkBuffer), buffercount);
+    model->uniformBuffersMemory = (VkDeviceMemory*)gfc_allocate_array(sizeof(VkDeviceMemory), buffercount);
     model->uniformBufferCount = buffercount;
 
     for (i = 0; i < buffercount; i++)

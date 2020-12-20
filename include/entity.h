@@ -56,6 +56,9 @@ typedef struct Entity_S {
 	Vector3D modelPosOffset;	// Model position offset
 	Vector3D modelRotOffset;	// Model rotation offset 
 
+	float frame;		// Current frame index of animation
+	float max_frames;	// Maximim frame index of animation
+
 	// Physics
 	Vector3D position;	// Position in 3D space
 	Vector3D rotation;	// Euler rotation in radians
