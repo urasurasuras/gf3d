@@ -2,6 +2,7 @@
 #include "collision.h"
 #include "entity.h"
 #include "game.h"
+#include "octree.h"
 
 
 static EntityManager entity_manager = { 0 };
@@ -116,6 +117,18 @@ void entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
 	}
 }
 
+void entity_octree_all(){
+
+	if (!entity_manager.entity_octree){
+		return;
+	}
+
+	for (Uint32 i = 0; i < entity_manager.entity_count; i++) {
+		if (!entity_manager.entity_list[i]._inuse)continue;
+		
+		octree_add(entity_manager.entity_octree, entity_manager.entity_list[i], NULL);
+	}
+}
 void entity_think_all(float deltaTime) {
 	
 	for (Uint32 i = 0; i < entity_manager.entity_count; i++) {

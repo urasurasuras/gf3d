@@ -4,6 +4,7 @@
 #include "gfc_input.h"
 #include "simple_json.h"
 #include "menu.h"
+#include "octree.h"
 
 static GameManager game_manager = { 0 };
 
@@ -267,7 +268,9 @@ int main(int argc,char *argv[])
     );
 	slog_sync();
 
-    entity_init(128);
+    entity_init(256);
+    get_entity_manager()->entity_octree = octree_init(160,160,160);
+
     UI_manager_init(32);
     gfc_input_init("");
 

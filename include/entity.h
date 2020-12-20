@@ -73,6 +73,8 @@ typedef struct Entity_S {
 typedef struct {
 	Entity* entity_list;
 	Uint32 entity_count;
+
+	octree_t * entity_octree;
 }EntityManager;
 
 /**
