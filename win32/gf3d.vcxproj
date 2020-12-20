@@ -111,6 +111,7 @@
     <ClInclude Include="..\include\dinos.h" />
     <ClInclude Include="..\include\entity.h" />
     <ClInclude Include="..\include\game.h" />
+    <ClInclude Include="..\include\gf2d_mouse.h" />
     <ClInclude Include="..\include\gf3d_camera.h" />
     <ClInclude Include="..\include\gf3d_commands.h" />
     <ClInclude Include="..\include\gf3d_extensions.h" />
@@ -147,6 +148,7 @@
     <ClCompile Include="..\src\dinos.c" />
     <ClCompile Include="..\src\entity.c" />
     <ClCompile Include="..\src\game.c" />
+    <ClCompile Include="..\src\gf2d_mouse.c" />
     <ClCompile Include="..\src\gf3d_camera.c" />
     <ClCompile Include="..\src\gf3d_commands.c" />
     <ClCompile Include="..\src\gf3d_extensions.c" />
