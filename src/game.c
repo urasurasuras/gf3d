@@ -147,7 +147,7 @@ void game_level_load() {
     gfc_word_cpy(walls->name, "Walls");
     walls->model = gf3d_model_load("walls");
     walls->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
-    gf3d_model_load_animated("dino", 1, 250);
+    gf3d_model_load_animated("dino", 1, 150);
     // spawn_dino_yellow_random();
     // spawn_dino_yellow_random();
     // spawn_dino_yellow_random();
@@ -172,10 +172,10 @@ void floor_rotate(Entity* self, float deltaTime) {
     else if (keys[SDL_SCANCODE_Z]) {
         self->rotation.z += (deltaTime);
     }
-} 
+}
 
 void spawn_pickup_random() {
-    
+
     Entity* self = entity_new();
     if (!self){
         slog("NULL entity pickup");
@@ -230,15 +230,15 @@ int main(int argc,char *argv[])
 
     Uint32 LAST =0;
     Uint32 NOW =0;
-    
+
     game_info_load();
 
     Uint32 yellow_dino_spawn_cldn = game_manager.game_info.yellow_dino_spawn_cldn;
     Uint32 yellow_dino_spawn_last = 0;
-    
+
     Uint32 red_dino_spawn_cldn = game_manager.game_info.red_dino_spawn_cldn;
     Uint32 red_dino_spawn_last = 0;
-        
+
     Uint32 blue_dino_spawn_cldn = game_manager.game_info.blue_dino_spawn_cldn;
     Uint32 blue_dino_spawn_last = 0;
 
@@ -255,8 +255,8 @@ int main(int argc,char *argv[])
             validate = 0;
         }
     }
-    
-    init_logger("gf3d.log");    
+
+    init_logger("gf3d.log");
     slog("gf3d begin");
     gf3d_vgraphics_init(
         "gf3d",                 //program name
@@ -269,9 +269,9 @@ int main(int argc,char *argv[])
 	slog_sync();
 
     entity_init(256);
+    UI_manager_init(32);
     get_entity_manager()->entity_octree = octree_init(160,160,160);
 
-    UI_manager_init(32);
     gfc_input_init("");
 
     // Load all models once
@@ -287,7 +287,7 @@ int main(int argc,char *argv[])
     game_main_load();
     game_level_load();
 
-    
+
     // test_hud2->_active = 1;
     // main game loop
     slog("MAIN LOOP BEGIN");
@@ -304,9 +304,9 @@ int main(int argc,char *argv[])
         game_manager.mousePos.y = (float)my;
 
 
-        //update game things here  
+        //update game things here
 
-        
+
         if (!game_manager.paused) {
             // Get mouse input delta
             game_manager.player->rotation.x -= (game_manager.mousePos.y - half_h) * 0.001;// V look (pitch)
@@ -349,19 +349,22 @@ int main(int argc,char *argv[])
             if (pickup_spawn_last + pickup_spawn_cldn < SDL_GetTicks()) {
                 pickup_spawn_last = SDL_GetTicks();
                 spawn_pickup_random();
-            }            
-            
-            entity_think_all(gameManager()->deltaTime);
+            }
+
+            // get_entity_manager()->entity_octree = octree_init(160,160,160);
+                entity_octree_all();
+                    entity_think_all(gameManager()->deltaTime);
+            // octree_clear(get_entity_manager()->entity_octree->root);
 
             gf3d_vgraphics_update_view();
 
         }
         else {
-            
+
             mouse_think();
             //slog("Game paused");
         }
-        
+
 
         LAST = NOW;
         NOW = SDL_GetTicks();
@@ -383,7 +386,7 @@ int main(int argc,char *argv[])
             }
 
                 gf3d_command_rendering_end(commandBuffer);
-                
+
 
                 // 2D overlay rendering
                 gf3d_pipeline_reset_frame(gf3d_vgraphics_get_overlay_pipeline(),bufferFrame);
@@ -401,7 +404,7 @@ int main(int argc,char *argv[])
 
         //play = 1; // start game after we are done with the first game loop
         if (game_manager.player_data->health <= 0) {
-            //done = 1; 
+            //done = 1;
             slog("Player health %.2f", game_manager.player_data->health);
         }
 
@@ -410,8 +413,8 @@ int main(int argc,char *argv[])
         }
 
     }
-    
-    vkDeviceWaitIdle(gf3d_vgraphics_get_default_logical_device());    
+
+    vkDeviceWaitIdle(gf3d_vgraphics_get_default_logical_device());
     //cleanup
     slog("gf3d PROGRAM END");
     slog_sync();

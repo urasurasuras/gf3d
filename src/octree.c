@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include "simple_logger.h"
+
 #include "octree.h"
+#include "entity.h"
 
 bool octree_node_add(octree_node_t* node, octree_data_t* obj);
 bool octree_node_divide(octree_node_t* node);
@@ -83,6 +86,10 @@ octree_node_t* octree_node_init(octree_obj_t obj) {
 // Determine whether or not an object intersects with a node using AABB
 // Return true on intersection
 inline bool octree_obj_intersects(octree_obj_t* obj1, octree_obj_t* obj2) {
+
+    if (    !obj1   ||  !obj2   ){
+        return false;
+    }
            // Check X
     return obj1->x < obj2->x + obj2->width &&
            obj1->x + obj1->width > obj2->x &&
@@ -97,6 +104,15 @@ inline bool octree_obj_intersects(octree_obj_t* obj1, octree_obj_t* obj2) {
 // Add an object into a node
 // Return true on success
 bool octree_node_add(octree_node_t* node, octree_data_t* obj) {
+
+    Entity * ent = NULL;
+
+    ent = (Entity*)obj->data;
+    if (ent){
+        slog("Adding %s to octree node at: %.2f,%.2f,%.2f", ent->name, node->obj.x, node->obj.y, node->obj.z);
+    }
+
+
     if ( node->leafs[0] == NULL ) {
         // Attempt to insert into children
         for ( int i = 0; i < OCTREE_MAX_CHILDREN; i++ ) {
@@ -287,7 +303,7 @@ octree_t* octree_init(float width, float height, float depth) {
 
 // Insert an object into the octree
 // Return true on success
-bool octree_add(octree_t* octree, void* ptr, octree_obj_t obj) {
+bool octree_add(octree_t* octree, void* ptr, void * ent) {
     // Allocate a data object for the object
     octree_data_t* data = (octree_data_t*) malloc(sizeof(octree_data_t));
 
@@ -295,7 +311,19 @@ bool octree_add(octree_t* octree, void* ptr, octree_obj_t obj) {
         return false;
     }
 
-    data->obj = obj;
+    Entity * current = (Entity*)ent;
+    if (!current)return false;
+
+    // Assign all entity data to octree object data
+    data->obj.x = current->position.x;
+    data->obj.y = current->position.y;
+    data->obj.z = current->position.z;
+
+    data->obj.depth = (float)current->rigidbody.collider_radius;
+    data->obj.height = (float)current->rigidbody.collider_radius;
+    data->obj.width = (float)current->rigidbody.collider_radius;
+
+    // data->obj = obj;
     data->data = ptr;
 
     return octree_node_add(octree->root, data);
@@ -320,11 +348,51 @@ octree_results_t* octree_search(octree_t* octree, octree_obj_t query) {
     return results;
 }
 
-// Release all memory allocated by an octree
-void octree_free(octree_t* octree) {
-    if ( octree->root != NULL ) {
-        octree_node_free(octree->root);
+void entity_octree_all(){
+
+    EntityManager * ent_manager = NULL;
+    ent_manager = get_entity_manager();
+    if (!ent_manager){
+        return;
     }
 
+    octree_t * octree = NULL;
+    octree = get_entity_manager()->entity_octree;
+	if (!octree){
+		return;
+	}
+
+	for (Uint32 i = 0; i < ent_manager->entity_count; i++) {
+
+		Entity * current = &ent_manager->entity_list[i];
+		if (!current->_inuse)continue;
+		if (current->type <= ent_LEVEL){
+			continue;
+		}
+		
+
+		octree_add(ent_manager->entity_octree, current, current);
+	}
+}
+
+void octree_clear(octree_node_t * root){
+    
+    if (!root) {
+        slog("Octree root NULL");
+        return;
+    }
+
+    octree_node_free(root);
+
+}
+// Release all memory allocated by an octree
+void octree_free(octree_t* octree) {
+
+    if (!octree){
+        slog("Octree NULL");
+        return;
+    }
+
+    octree_clear(octree->root);
     free(octree);
 }

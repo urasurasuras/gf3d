@@ -52,8 +52,8 @@ void spawn_dino_yellow_random() {
     dino->type = ent_CHAR;
     gfc_word_cpy(dino->name, "Dino");
     // dino->model = gf3d_model_load("dino");
-    dino->model = gf3d_model_load_animated("dino", 1, 250);
-    dino->max_frames = 250;
+    dino->model = gf3d_model_load_animated("dino", 1, 150);
+    dino->max_frames = 150;
     if(!dino->model){
         slog("NULL dino model");
         entity_free(dino);
@@ -82,7 +82,7 @@ void spawn_dino_yellow_random() {
     mob_data->reachedTarget = 0;
     mob_data->mobType = mob_YELLOW;
 
-    slog("Targeting %s", mob_data->target->name);
+    // slog("Targeting %s", mob_data->target->name);
 }
 
 void spawn_dino_red_random() {

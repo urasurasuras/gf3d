@@ -1,10 +1,11 @@
+// https://github.com/block8437/buildaverse
 #ifndef _OCTREE_H
 #define _OCTREE_H
 
 #include <stdbool.h>
 
 // Maximum amount of children before a subdivision
-#define OCTREE_MAX_CHILDREN 32
+#define OCTREE_MAX_CHILDREN 4
 
 // Initial size and growth rate of result data
 #define OCTREE_RESULT_SIZE 16
@@ -58,12 +59,15 @@ octree_t* octree_init(float width, float height, float depth);
 
 // Insert an object into the octree
 // Return true on success
-bool octree_add(octree_t* octree, void* ptr, octree_obj_t obj);
+bool octree_add(octree_t* octree, void* ptr, void * ent);
 
 // Search an octree for a specific boundry
 // Return results object containing objects intersecting the boundary on success,
 // NULL on failure.
 octree_results_t* octree_search(octree_t* octree, octree_obj_t query);
+
+// Release all memory of octree root
+void octree_clear(octree_node_t * root);
 
 // Release all memory allocated by an octree
 void octree_free(octree_t* octree);

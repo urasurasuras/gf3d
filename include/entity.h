@@ -5,7 +5,7 @@
 
 #include "gf3d_model.h"
 #include "gfc_matrix.h"
-
+#include "octree.h"
 
 typedef enum{
 	ent_NULL,
@@ -153,6 +153,7 @@ void entity_free(Entity* self);
 void entity_init(Uint32 max);
 Entity* entity_new();
 void entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer);
+void entity_octree_all();
 void entity_think_all(float deltaTime);
 /**
 * @brief Check all other entites for collision
