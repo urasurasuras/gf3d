@@ -17,7 +17,8 @@
 typedef struct 
 {
     Uint32      maxMenus;   /**<Maximum number of entities*/
-    UI_Element  *menuList;  /**<List of entities*/
+    UI_Element  *menuList;  /**<List of menu items*/
+    UI_Element  *hudList;   /**<List of HUD elements*/
     TTF_Font    *text;           
 }MenuManager;
 
@@ -65,6 +66,18 @@ UI_Element *UI_element_new(){
     return NULL;
 }
 
+UI_Element *HUD_element_new(){
+    int i;
+    for (i=0; i < menu_manager.maxMenus; i++){
+        if(menu_manager.hudList[i]._inuse)continue;
+        menu_manager.hudList[i]._inuse = 1;
+        // slog("Items in menu list %d", i);
+        return &menu_manager.hudList[i];
+    }
+    slog("out of open menu slots in memory");
+    return NULL;
+}
+
 void UI_manager_init(Uint32 maxMenus){
     if (menu_manager.menuList != NULL){
         //TODO: cleanup
@@ -80,12 +93,27 @@ void UI_manager_init(Uint32 maxMenus){
     menu_manager.maxMenus = maxMenus;
     memset(menu_manager.menuList,0,sizeof(UI_Element)*maxMenus);
     slog("UI_Element manager initalized");
+
+    if (menu_manager.hudList != NULL){
+        //TODO: cleanup
+    }
+    if (!maxMenus){
+        slog("cannot init 0 zise menu list");
+        return;
+    }
+    menu_manager.hudList = (UI_Element * )malloc(sizeof(UI_Element) * maxMenus);
+    if (menu_manager.hudList == NULL){
+        slog("failed to allocate %i menus for the menu manager",maxMenus);
+    }
+    menu_manager.maxMenus = maxMenus;
+    memset(menu_manager.hudList,0,sizeof(UI_Element)*maxMenus);
+    slog("UI_Element manager initalized");
     atexit(UI_manager_close);
 }
 
 void UI_manager_close(){
-    int i;
-    for (i=0; i < menu_manager.maxMenus; i++){
+
+    for (int i=0; i < menu_manager.maxMenus; i++){
         if(menu_manager.menuList[i]._inuse){
             UI_free(&menu_manager.menuList[i]);
         }
@@ -93,6 +121,16 @@ void UI_manager_close(){
     menu_manager.maxMenus = 0;
     free(menu_manager.menuList);
     menu_manager.menuList =NULL;
+    slog("menu manager closed");
+
+    for (int i=0; i < menu_manager.maxMenus; i++){
+        if(menu_manager.hudList[i]._inuse){
+            UI_free(&menu_manager.hudList[i]);
+        }
+    }
+    menu_manager.maxMenus = 0;
+    free(menu_manager.hudList);
+    menu_manager.hudList =NULL;
     slog("menu manager closed");
 }
 
@@ -144,7 +182,20 @@ void UI_draw(UI_Element *self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 
 }
 
-void UI_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer)
+void HUD_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer)
+{
+    int i;
+    for (i = 0;i < menu_manager.maxMenus;i++)
+    {
+        UI_Element * el = &menu_manager.hudList[i];
+        if (!el->_inuse)continue;
+        // if (!menu_manager.menuList[i]._active)continue;
+
+        UI_draw(el, bufferFrame, commandBuffer);
+    }
+}
+
+void MENU_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer)
 {
     int i;
     for (i = 0;i < menu_manager.maxMenus;i++)

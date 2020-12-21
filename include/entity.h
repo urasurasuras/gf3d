@@ -5,6 +5,7 @@
 
 #include "gf3d_model.h"
 #include "gfc_matrix.h"
+#include "menu.h"
 
 
 typedef enum{
@@ -124,6 +125,8 @@ typedef struct {
 	float power;
 
 	void (*primaryAttack)(Entity* self);
+
+	UI_Element * HUD;
 
 }Character;
 

@@ -42,6 +42,7 @@ void mouse_think();
  * @return NULL on out of memory or error, a pointer to a blank entity otherwise
  */
 UI_Element *UI_element_new();
+UI_Element *HUD_element_new();
 
 /**
  * @brief initialize entity resource manager
@@ -71,10 +72,12 @@ void UI_update(UI_Element *self);
  */
 void UI_update_all();
 
+
+void HUD_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer);
 /**
  * @brief draw every active entity
  */
-void UI_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer);
+void MENU_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer);
 
 /**
  * @brief For each entity, check all other entities for collision

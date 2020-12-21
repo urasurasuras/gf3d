@@ -198,18 +198,21 @@ void player_think(Entity* self) {
 		if (keys[SDL_SCANCODE_1]) {
 			character->primaryAttack = player_hitscan_attack;
 			character->CLDN2 = 100;
+			character->HUD->sprite = gf3d_sprite_load("images/ak_sprite.png", -1, -1, 0);
 			slog("Weapon 1 selected");
 			swapped = 1;
 		}
 		if (keys[SDL_SCANCODE_2]) {
 			character->primaryAttack = player_projectile_attack;
 			character->CLDN2 = 500;
+			character->HUD->sprite = gf3d_sprite_load("images/ak2_sprite.png", -1, -1, 0);
 			slog("Weapon 2 selected");
 			swapped = 1;
 		}
 		if (keys[SDL_SCANCODE_3]) {
 			character->primaryAttack = player_projectile_arrow_attack;
 			character->CLDN2 = 1000;
+			character->HUD->sprite = gf3d_sprite_load("images/ak3_sprite.png", -1, -1, 0);
 			slog("Weapon 3 selected");
 			swapped = 1;
 		}

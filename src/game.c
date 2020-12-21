@@ -132,7 +132,13 @@ void game_main_load(){
 
     // Create PLAYER
     game_manager.player = player_spawn();
+    
+    UI_Element * hud = HUD_element_new();
+    hud->sprite = gf3d_sprite_load("images/ak_sprite.png", -1, -1, 0);
+    hud->position.x = 1400;
+    hud->position.y = 700;
 
+    game_manager.player_data->HUD = hud;
 
     // Create demo
     Entity * dino1 = NULL;
@@ -514,9 +520,10 @@ int main(int argc,char *argv[])
                 // 2D overlay rendering
                 gf3d_pipeline_reset_frame(gf3d_vgraphics_get_overlay_pipeline(),bufferFrame);
                 commandBuffer = gf3d_command_rendering_begin(bufferFrame,gf3d_vgraphics_get_overlay_pipeline());
-            if (game_manager.paused) {
-
-                    UI_draw_all(bufferFrame, commandBuffer);
+            if (!game_manager.paused) {
+                HUD_draw_all(bufferFrame, commandBuffer);
+            }else{
+                MENU_draw_all(bufferFrame, commandBuffer);
             }
 
                 gf3d_command_rendering_end(commandBuffer);
