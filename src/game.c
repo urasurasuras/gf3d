@@ -4,11 +4,64 @@
 #include "gfc_input.h"
 #include "simple_json.h"
 #include "menu.h"
+#include "entity.h"
 
 static GameManager game_manager = { 0 };
 
 void game_exit(){
     game_manager.done = true; // exit condition
+
+    // Save if in editor mode
+    if (game_manager.editorMode){
+        SJson *allData = NULL;
+        allData = sj_object_new();
+        if (!allData)return;
+
+        SJson *data_array = NULL;
+        data_array = sj_array_new();
+
+        for (Uint32 i = 0; i < get_entity_manager()->entity_count; i++) {
+
+            Entity * ent = NULL;
+            ent = &get_entity_manager()->entity_list[i];
+
+            if (!ent)continue;
+		    if (!ent->_inuse)continue;
+            if (ent->type != ent_EDITOR)continue;
+
+            // Name
+            SJson * ent_sj = sj_object_new();
+
+                sj_object_insert(ent_sj, "Name", sj_new_str(ent->name));
+
+            // Pos
+            SJson * pos_sj = sj_array_new();
+ 
+                sj_array_append(pos_sj,sj_new_float(ent->position.x));
+                sj_array_append(pos_sj,sj_new_float(ent->position.y));
+                sj_array_append(pos_sj,sj_new_float(ent->position.z));
+
+                sj_object_insert(ent_sj, "Position", pos_sj);
+
+            // Rot
+            SJson * rot_sj = sj_array_new();
+ 
+                sj_array_append(rot_sj,sj_new_float(ent->rotation.x));
+                sj_array_append(rot_sj,sj_new_float(ent->rotation.y));
+                sj_array_append(rot_sj,sj_new_float(ent->rotation.z));
+
+                sj_object_insert(ent_sj, "Rotation", rot_sj);
+
+            sj_array_append(data_array, ent_sj);
+
+        }
+
+        sj_object_insert(allData, "Ents", data_array);
+        
+        sj_echo(allData);
+        sj_save(allData, "cfg/editor.save");
+        sj_free(allData);
+    }
 }
 
 void toggle_pause(){
@@ -146,7 +199,79 @@ void game_level_load() {
     gfc_word_cpy(walls->name, "Walls");
     walls->model = gf3d_model_load("walls");
     walls->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
-    gf3d_model_load_animated("dino", 1, 250);
+    
+    if (!game_manager.editorMode){
+        gf3d_model_load_animated("dino", 1, 250);
+    }
+    
+    SJson *save_sj = sj_load("cfg/editor.save");
+
+    if (save_sj){
+        slog("Loading from editor save");
+
+        sj_echo(save_sj);
+
+            SJson * ent_array = sj_object_get_value(save_sj, "Ents");
+
+            
+            for (int i = 0; i < sj_array_get_count(ent_array); i++) {
+
+                Entity * ent = NULL;
+                ent = entity_new();
+
+                if (!ent){
+                    continue;
+                }
+                
+                SJson * ent_sj = sj_array_get_nth(ent_array, i);
+
+                    // Name
+                    SJson * name_sj = sj_object_get_value(ent_sj, "Name");
+
+                    gfc_word_cpy(ent->name, sj_get_string_value(name_sj));
+
+                    // Pos
+                    SJson * pos_sj = sj_object_get_value(ent_sj, "Position");
+
+                        SJson * X_pos_sj = sj_array_get_nth(pos_sj, 0);
+                        SJson * Y_pos_sj = sj_array_get_nth(pos_sj, 1);
+                        SJson * Z_pos_sj = sj_array_get_nth(pos_sj, 2);
+
+                        Vector3D pos;
+                        sj_get_float_value(X_pos_sj, &pos.x);
+                        sj_get_float_value(Y_pos_sj, &pos.y);
+                        sj_get_float_value(Z_pos_sj, &pos.z);
+                        
+                        vector3d_slog(pos);
+
+                    vector3d_copy(ent->position, pos);
+
+                    // Rot
+                    SJson * rot_sj = sj_object_get_value(ent_sj, "Rotation");
+
+                        SJson * X_rot_sj = sj_array_get_nth(rot_sj, 0);
+                        SJson * Y_rot_sj = sj_array_get_nth(rot_sj, 1);
+                        SJson * Z_rot_sj = sj_array_get_nth(rot_sj, 2);
+
+                        Vector3D rot;
+                        sj_get_float_value(X_rot_sj, &rot.x);
+                        sj_get_float_value(Y_rot_sj, &rot.y);
+                        sj_get_float_value(Z_rot_sj, &rot.z);
+
+                        vector3d_slog(rot);
+
+                    vector3d_copy(ent->rotation, rot);
+
+                // ent->type = ent_LEVEL;
+                ent->max_frames = 1;
+                ent->model = gf3d_model_load("wall");
+            }
+      
+        sj_free(save_sj);
+
+    }
+
+
     // spawn_dino_yellow_random();
     // spawn_dino_yellow_random();
     // spawn_dino_yellow_random();
@@ -249,9 +374,10 @@ int main(int argc,char *argv[])
     SDL_ShowCursor(SDL_DISABLE);
     for (a = 1; a < argc;a++)
     {
-        if (strcmp(argv[a],"-disable_validate") == 0)
+        if (strcmp(argv[a],"-editor") == 0)
         {
-            validate = 0;
+            slog("Editor mode");
+            game_manager.editorMode = 1;
         }
     }
     
@@ -330,24 +456,26 @@ int main(int argc,char *argv[])
 
             SDL_WarpMouseInWindow(NULL, half_w, half_h);
 
+            if (!game_manager.editorMode){
+                if (yellow_dino_spawn_last + yellow_dino_spawn_cldn < SDL_GetTicks()) {
+                    yellow_dino_spawn_last = SDL_GetTicks();
+                    spawn_dino_yellow_random();
+                }
+                if (red_dino_spawn_last + red_dino_spawn_cldn < SDL_GetTicks()) {
+                    red_dino_spawn_last = SDL_GetTicks();
+                    spawn_dino_red_random();
+                }
+                if (blue_dino_spawn_last + blue_dino_spawn_cldn < SDL_GetTicks()) {
+                    blue_dino_spawn_last = SDL_GetTicks();
+                    spawn_dino_blue_random();
+                }
+                if (pickup_spawn_last + pickup_spawn_cldn < SDL_GetTicks()) {
+                    pickup_spawn_last = SDL_GetTicks();
+                    spawn_pickup_random();
+                }            
+                
+            }
 
-            if (yellow_dino_spawn_last + yellow_dino_spawn_cldn < SDL_GetTicks()) {
-                yellow_dino_spawn_last = SDL_GetTicks();
-                spawn_dino_yellow_random();
-            }
-            if (red_dino_spawn_last + red_dino_spawn_cldn < SDL_GetTicks()) {
-                red_dino_spawn_last = SDL_GetTicks();
-                spawn_dino_red_random();
-            }
-            if (blue_dino_spawn_last + blue_dino_spawn_cldn < SDL_GetTicks()) {
-                blue_dino_spawn_last = SDL_GetTicks();
-                spawn_dino_blue_random();
-            }
-            if (pickup_spawn_last + pickup_spawn_cldn < SDL_GetTicks()) {
-                pickup_spawn_last = SDL_GetTicks();
-                spawn_pickup_random();
-            }            
-            
             entity_think_all(gameManager()->deltaTime);
 
             gf3d_vgraphics_update_view();

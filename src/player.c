@@ -1,5 +1,7 @@
 #include "player.h"
 #include "simple_logger.h"
+#include "gfc_input.h"
+#include "editor.h"
 
 Entity * player_spawn(){
 
@@ -21,7 +23,11 @@ Entity * player_spawn(){
     gf3d_get_cam()->player = player;
 	player->modelPosOffset = vector3d(0, 0, 10);
     player->modelRotOffset = vector3d(GFC_HALF_PI, 0, GFC_HALF_PI);
-    player->think = player_think;
+	if (gameManager()->editorMode){
+		player->think = editor_think;
+	}else{
+    	player->think = player_think;
+	}
     //player->think = floor_rotate;
     player->type = ent_CHAR;
     player->rigidbody.speed = 20;
@@ -91,20 +97,14 @@ void player_projectile_arrow_attack(Entity* self) {
 	projectile_arrow_spawn(self);
 }
 
-void player_think(Entity* self) {	
-
-	if (!self){
-		slog("NULL self");
-		return;
-	}
-	
-	float deltaTime =  gameManager()->deltaTime;
+void player_move(Entity * self){
 
 	Character* character = (Character*)self->entData;
 	if (!character){
 		slog("No character data provided for %s", self->name);
 		return;
 	}
+		float deltaTime =  gameManager()->deltaTime;
 
 	// Set facing direction to rotation
 	self->facingDirection.x = cos(self->rotation.y) /** cos(self->rotation.x)*/;
@@ -149,13 +149,34 @@ void player_think(Entity* self) {
 		self->rigidbody.speed = 15;
 	}
 
-	if (character->last_CLDN1 + character->CLDN1 < SDL_GetTicks()) {
-		if (keys[SDL_SCANCODE_SPACE]) {
-			character->last_CLDN1 = SDL_GetTicks();
-			self->position.y += 10;
-			//self->rigidbody.velocity.y += 1;
-		}
+	self->rigidbody.speed *= character->speed_buff;
+	entity_move(self);
+
+	if (character->speed_buff < 1) {
+		character->speed_buff = 1;
 	}
+	else {
+		character->speed_buff -= deltaTime;
+	}
+}
+
+void player_think(Entity* self) {	
+
+	if (!self){
+		slog("NULL self");
+		return;
+	}
+	
+	float deltaTime =  gameManager()->deltaTime;
+
+	Character* character = (Character*)self->entData;
+	if (!character){
+		slog("No character data provided for %s", self->name);
+		return;
+	}
+	
+	player_move(self);
+	
 	if (character->last_CLDN2 + character->CLDN2 < SDL_GetTicks()) {		
 		if (SDL_GetMouseState(NULL, NULL) && SDL_BUTTON(SDL_BUTTON_LEFT)) {
 
@@ -208,14 +229,13 @@ void player_think(Entity* self) {
 		//slog("%d", character->last_CLDN3);
 
 	}
-	self->rigidbody.speed *= character->speed_buff;
-	entity_move(self);
-
-	if (character->speed_buff < 1) {
-		character->speed_buff = 1;
-	}
-	else {
-		character->speed_buff -= deltaTime;
+	
+		if (character->last_CLDN1 + character->CLDN1 < SDL_GetTicks()) {
+		if (keys[SDL_SCANCODE_SPACE]) {
+			character->last_CLDN1 = SDL_GetTicks();
+			self->position.y += 10;
+			//self->rigidbody.velocity.y += 1;
+		}
 	}
 }
 

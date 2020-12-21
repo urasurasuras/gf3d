@@ -9,6 +9,7 @@
 
 typedef enum{
 	ent_NULL,
+	ent_EDITOR,
 	ent_LEVEL,
 	ent_CHAR,
 	ent_PROJECTILE,
@@ -20,7 +21,6 @@ typedef enum{
 	char_PLAYER,
 	char_AI
 }CharType;
-
 
 typedef struct{
 	float x;

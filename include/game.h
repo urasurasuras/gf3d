@@ -45,6 +45,7 @@ typedef struct GameManager_S {
 	
 	Bool done;
 	Bool paused;
+	Bool editorMode;
 	
 	Entity * player;
 	Character* player_data;

@@ -74,7 +74,7 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 
 	self->frame = self->frame + 0.1;
 	if (self->frame >= self->max_frames){
-		slog("Reset frame");
+		// slog("Reset frame");
 		self->frame = 0;
 	}
 
@@ -117,8 +117,11 @@ void entity_draw(Entity* self, Uint32 bufferFrame, VkCommandBuffer commandBuffer
 void entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer) {
 
 	for (Uint32 i = 0; i < entity_manager.entity_count; i++) {
-		if (entity_manager.entity_list[i]._inuse) {
-			entity_draw(&entity_manager.entity_list[i], bufferFrame, commandBuffer);
+
+		Entity * current = &entity_manager.entity_list[i];
+
+		if (current->_inuse) {
+			entity_draw(current, bufferFrame, commandBuffer);
 		}
 	}
 }
