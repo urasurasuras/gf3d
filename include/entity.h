@@ -11,6 +11,7 @@ typedef enum{
 	ent_NULL,
 	ent_EDITOR,
 	ent_LEVEL,
+	ent_WALL,
 	ent_CHAR,
 	ent_PROJECTILE,
 	ent_PICKUP

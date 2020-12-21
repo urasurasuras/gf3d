@@ -25,7 +25,7 @@ void editor_think(Entity* self){
 		editor_spawn_entity(self->position, self->rotation, "wall");
 	}
 	if(gfc_input_key_pressed("2")){
-		slog("ASDASDASD");
+		editor_spawn_entity(self->position, self->rotation, "pillar");
 	}
 	if(gfc_input_key_pressed("3")){
 		slog("qweqweqweq");

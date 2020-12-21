@@ -52,8 +52,8 @@ void spawn_dino_yellow_random() {
     dino->type = ent_CHAR;
     gfc_word_cpy(dino->name, "Dino");
     // dino->model = gf3d_model_load("dino");
-    dino->model = gf3d_model_load_animated("dino", 1, 250);
-    dino->max_frames = 250;
+    dino->model = gf3d_model_load_animated("dino", 1, 150);
+    dino->max_frames = dino->model->frameCount;
     if(!dino->model){
         slog("NULL dino model");
         entity_free(dino);

@@ -201,7 +201,7 @@ void game_level_load() {
     walls->modelRotOffset = vector3d(-GFC_HALF_PI, 0, 0);
     
     if (!game_manager.editorMode){
-        gf3d_model_load_animated("dino", 1, 250);
+        gf3d_model_load_animated("dino", 1, 150);
     }
     
     SJson *save_sj = sj_load("cfg/editor.save");
@@ -262,9 +262,10 @@ void game_level_load() {
 
                     vector3d_copy(ent->rotation, rot);
 
-                // ent->type = ent_LEVEL;
+                ent->type = ent_WALL;
                 ent->max_frames = 1;
-                ent->model = gf3d_model_load("wall");
+                ent->model = gf3d_model_load(ent->name);
+                ent->rigidbody.collider_radius = 4;
             }
       
         sj_free(save_sj);

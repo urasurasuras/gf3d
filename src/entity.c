@@ -240,6 +240,42 @@ void entity_entity_collide(Entity* e1, Entity* e2) {
 
 	break;
 
+	case ent_WALL:
+
+		switch (e2->type)
+		{
+		case ent_CHAR:
+
+		otherChar = (Character*)e2->entData;
+
+			if (!otherChar) {
+				slog("%s is not a character! (has null data pointer)", e2->name);
+				break;
+			}
+
+			// if this ent is in circle collision with the other ent
+			if (collide_sphere(e1->position, e1->rigidbody.collider_radius, e2->position, e2->rigidbody.collider_radius))
+			{// Sphere-to-sphere
+				
+				// cache wall pos then reset it after pushback,
+				// if anyone reads this part of the code, 
+				// I'm sorry but I need to keep my sanity for now
+
+				Vector3D pos ;
+				vector3d_copy(pos, e1->position);
+
+				sphere_to_sphere_pushback(e2, e1);
+
+				vector3d_copy(e1->position, pos);
+
+			}
+			break;
+		
+		default:
+			break;
+		}
+
+	break;
 	case ent_CHAR:
 
 		thisChar = (Character*)e1->entData;
